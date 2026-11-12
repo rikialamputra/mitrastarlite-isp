@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OLT Script Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="../index.html" aria-label="Network Tools - Beranda">
+        <span class="brand-mark">OLT</span>
+        <span><strong>Network Tools</strong><small>OLT Configuration Suite</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Navigasi utama">
+        <a class="nav-link" href="../index.html"><span aria-hidden="true">⌂</span> Beranda</a>
+        <a class="nav-link active" href="index.html" aria-current="page"><span aria-hidden="true">⌘</span> Script Generator</a>
+      </nav>
+      <span class="topbar-tag"><span class="status-dot"></span> Local Generator</span>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="eyebrow">NETWORK AUTOMATION / CONFIG BUILDER</div>
+        <h1>OLT Script Generator</h1>
+        <p>Buat konfigurasi OLT dengan parameter yang dinamis. Preview script langsung di halaman ini, lalu salin tanpa mengunduh file.</p>
+      </section>
+
+      <section class="workspace">
+        <aside class="panel config-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="step-label">STEP 01</span>
+              <h2>Konfigurasi</h2>
+            </div>
+            <span class="heading-icon">⌘</span>
+          </div>
+
+          <label class="field-label" for="vendor">Vendor</label>
+          <select id="vendor">
+            <option value="huawei">Huawei</option>
+            <option value="fiberhome">Fiberhome</option>
+            <option value="nokia">Nokia</option>
+          </select>
+
+          <label class="field-label" for="model">Jenis OLT</label>
+          <select id="model">
+            <option value="pizza">Pizza</option>
+            <option value="chassis">Chassis — Coming Soon</option>
+          </select>
+
+          <div id="mode-wrap">
+            <label class="field-label" for="mode">Jenis konfigurasi</label>
+            <select id="mode">
+              <option value="new">Konfigurasi baru</option>
+              <option value="change-ip">Ganti IP</option>
+            </select>
+          </div>
+
+          <div class="section-rule"></div>
+          <div class="section-title">Parameter</div>
+          <div id="fields" class="fields"></div>
+
+          <div id="notice" class="notice" role="status"></div>
+          <button id="generate" class="primary-button" type="button">
+            <span>Generate Script</span><span aria-hidden="true">→</span>
+          </button>
+          <p class="panel-footnote">Pastikan semua parameter sudah benar sebelum menerapkan konfigurasi ke perangkat.</p>
+        </aside>
+
+        <section class="panel preview-panel">
+          <div class="preview-heading">
+            <div>
+              <span class="step-label">STEP 02</span>
+              <h2>Script Preview</h2>
+              <p id="preview-description">Huawei · Pizza</p>
+            </div>
+            <button id="copy" class="secondary-button" type="button" disabled>
+              <span aria-hidden="true">▢</span> Copy Script
+            </button>
+          </div>
+
+          <div class="terminal">
+            <div class="terminal-bar">
+              <div class="window-dots"><i></i><i></i><i></i></div>
+              <span id="terminal-title">olt-config.txt</span>
+              <span class="terminal-language">CONFIG</span>
+            </div>
+            <div class="code-wrap">
+              <div id="line-numbers" class="line-numbers" aria-hidden="true">1</div>
+              <pre id="output" aria-live="polite">Pilih vendor dan isi parameter, lalu klik “Generate Script”.</pre>
+            </div>
+          </div>
+          <div class="preview-footer">
+            <span id="line-count">0 baris</span>
+            <span id="copy-status" aria-live="polite">Preview akan tampil di sini</span>
+          </div>
+          <div class="tip"><span class="tip-icon">i</span><p><strong>Periksa kembali sebelum digunakan.</strong> Script ini dibuat dari template yang kamu berikan. Validasi sintaks dan kompatibilitas dengan versi firmware OLT sebelum menjalankannya.</p></div>
+        </section>
+      </section>
+    </main>
+    <footer>OLT Tools <span>•</span>Created by AlamHost</footer>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
