@@ -2,7 +2,7 @@
 // (JANGAN LUPA ISI SESUAI FIREBASE KAMU)
 const firebaseConfig = {
     apiKey: "AIzaSyBDXdFrGmoX-qWVMyPC9Bj61KTTJOaoVrM",
-    authDomain: "mitrastarlite-isp.alamhost.com",
+    authDomain: "mitrastarlite-isp.vercel.app",
     projectId: "olt-isp",
     storageBucket: "olt-isp.firebasestorage.app",
     messagingSenderId: "239840188680",
