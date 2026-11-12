@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+
+<html lang="id">
+
+
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard OLT Network</title>
+
+    <!-- Bootstrap CSS -->
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Firebase (Menggunakan versi 8 compat) -->
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <!-- Chart.js -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        body {
+
+            background-color: #f4f6f9;
+
+        }
+
+
+
+        #dashboard {
+
+            display: none;
+
+        }
+
+
+
+        /* Sembunyikan sebelum login */
+
+        .card {
+
+            border: none;
+
+            border-radius: 10px;
+
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+        }
+
+
+
+        .table-responsive {
+
+            max-height: 600px;
+
+        }
+
+
+
+        /* HWI Script Generator — styling only, JavaScript logic stays unchanged */
+        #hwi-generator {
+            background-color: #fff;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        #hwi-generator > .d-flex:first-child {
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eef1f5;
+        }
+
+        #hwi-generator h5 {
+            color: #212529;
+            font-weight: 700;
+            letter-spacing: 0.1px;
+        }
+
+        #hwi-generator .form-label {
+            color: #344054;
+            margin-bottom: 0.45rem;
+        }
+
+        #hwi-generator .form-control,
+        #hwi-generator .form-select {
+            min-height: 42px;
+            border: 1px solid #d9e0e8;
+            border-radius: 8px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #hwi-generator .form-control:focus,
+        #hwi-generator .form-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+        }
+
+        #hwi-generator input[type="file"] {
+            padding: 0.65rem;
+            background: #f8fafc;
+            border: 1px dashed #b8c4d1;
+            border-radius: 8px;
+        }
+
+        #hwi-generator input[type="file"]::file-selector-button {
+            border: 0;
+            border-radius: 6px;
+            padding: 0.4rem 0.7rem;
+            margin-right: 0.75rem;
+            background: #e9f2ff;
+            color: #0d6efd;
+            font-weight: 600;
+        }
+
+        #hwi-generator .form-text {
+            color: #667085;
+            font-size: 0.82rem;
+        }
+
+        #hwi-generator .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 0.55rem 0.9rem;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        #hwi-generator .btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(33, 37, 41, 0.12);
+        }
+
+        #hwi-generator .btn:disabled {
+            cursor: wait;
+            opacity: 0.75;
+        }
+
+        #hwi-generator .badge {
+            padding: 0.55rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        #hwi-generator #hwiError {
+            border-radius: 8px;
+        }
+
+        #hwi-generator #summaryBox {
+            border: 1px solid #dbe7f7 !important;
+            border-left: 4px solid #0d6efd !important;
+            border-radius: 10px;
+            background: #f5f9ff !important;
+            padding: 1rem 1.1rem;
+        }
+
+        #hwi-generator #summaryBox h6 {
+            color: #174ea6;
+        }
+
+        #hwi-generator #summaryText {
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        #hwi-generator .table-responsive {
+            max-height: 400px;
+            overflow: auto;
+            border: 1px solid #e3e8ef !important;
+            border-radius: 10px;
+        }
+
+        #hwi-generator table {
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+
+        #hwi-generator thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #212529;
+            color: #fff;
+            font-size: 0.84rem;
+            vertical-align: middle;
+        }
+
+        #hwi-generator tbody td {
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        #hwi-generator tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        @media (max-width: 767.98px) {
+            #hwi-generator {
+                padding: 1rem !important;
+                border-radius: 10px;
+            }
+
+            #hwi-generator > .d-flex:first-child {
+                align-items: flex-start !important;
+            }
+
+            #hwi-generator .btn {
+                min-height: 40px;
+            }
+        }
+
+
+        /* OLT Script Generator — hanya mengatur tampilan, bukan logika generator */
+        #olt-script-generator.generator-container {
+            width: 100%;
+            margin: 0 0 1.5rem;
+            padding: 1.5rem;
+            background: #fff;
+            border: 1px solid #e3e8ef;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        #olt-script-generator .generator-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: .75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        #olt-script-generator h3 {
+            margin: 0;
+            color: #172b4d;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        #olt-script-generator .generator-description {
+            margin: .4rem 0 0;
+            color: #6c757d;
+            font-size: .9rem;
+        }
+
+        #olt-script-generator .generator-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        #olt-script-generator .form-group {
+            display: flex;
+            min-width: 0;
+            flex-direction: column;
+            gap: .45rem;
+        }
+
+        #olt-script-generator .form-group label {
+            margin: 0;
+            color: #344054;
+            font-size: .9rem;
+            font-weight: 600;
+        }
+
+        #olt-script-generator .form-group input {
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 42px;
+            padding: .65rem .75rem;
+            color: #212529;
+            background: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color .18s ease, box-shadow .18s ease;
+        }
+
+        #olt-script-generator .form-group input[type="file"] {
+            padding: .45rem;
+            background: #f8fafc;
+            border-style: dashed;
+            border-color: #aab7c7;
+        }
+
+        #olt-script-generator .form-group input:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .15);
+        }
+
+        #olt-script-generator .form-text {
+            color: #6c757d;
+            font-size: .8rem;
+            line-height: 1.5;
+        }
+
+        #olt-script-generator button {
+            width: fit-content;
+            min-height: 40px;
+            padding: .65rem 1rem;
+            border: 0;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter .18s ease, transform .18s ease;
+        }
+
+        #olt-script-generator button:hover {
+            filter: brightness(.95);
+        }
+
+        #olt-script-generator button:active {
+            transform: translateY(1px);
+        }
+
+        #olt-script-generator .btn-primary {
+            grid-column: 1 / -1;
+            color: #fff;
+            background: #0d6efd;
+        }
+
+        #olt-script-generator .btn-success {
+            color: #fff;
+            background: #198754;
+        }
+
+        #olt-script-generator .summary-box {
+            padding: 1rem 1.1rem;
+            background: #f5f9ff;
+            border: 1px solid #d8e7fb;
+            border-left: 4px solid #0d6efd;
+            border-radius: 10px;
+        }
+
+        #olt-script-generator .summary-box h4 {
+            margin: 0 0 .65rem;
+            color: #172b4d;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        #olt-script-generator #summaryText {
+            margin-bottom: 1rem;
+            color: #344054;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 767.98px) {
+            #olt-script-generator.generator-container {
+                padding: 1rem;
+            }
+
+            #olt-script-generator .generator-form {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            #olt-script-generator .btn-primary,
+            #olt-script-generator .btn-success {
+                width: 100%;
+            }
+        }
+
+#NAV
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333333;
+}
+
+ul li {
+  float: left;
+}
+
+ul li a {
+  display: block;
+  color: blue;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+ul li a:hover {
+  background-color: #111111;
+}
+
+    </style>
+
+</head>
+
+
+
+<body>
+
+
+
+    <!-- Halaman Login dengan Input Email (Passwordless) -->
+
+    <div id="login-page" class="container mt-5" style="max-width: 400px;">
+
+        <div class="text-center">
+
+            <img src="https://via.placeholder.com/150?text=Weave+Logo" alt="Logo" class="mb-4">
+
+            <h2>Login Network Dashboard</h2>
+
+            <p class="text-muted">Gunakan email @weave.co.id untuk masuk</p>
+
+        </div>
+
+
+
+        <div class="card p-4 mt-3">
+
+            <form id="login-form">
+
+                <div class="mb-3">
+
+                    <label for="emailInput" class="form-label">Email Akses</label>
+
+                    <input type="email" class="form-control" id="emailInput" placeholder="nama@weave.co.id" required>
+
+                </div>
+
+                <button type="submit" id="btn-login" class="btn btn-primary w-100">Kirim Link Login</button>
+
+            </form>
+
+            <div id="login-message" class="mt-3 text-center" style="display: none;"></div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Halaman Dashboard Utama -->
+
+    <div id="dashboard" class="container-fluid py-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <h4>Dashboard OLT ISP</h4>
+            <div>
+<ul class="nav nav-pills gap-2">
+    <li class="nav-item">
+        <a class="nav-link text-secondary fw-semibold px-3" href="/">Home</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active fw-semibold px-3" href="/scriptgen">
+            <i class="bi bi-terminal me-1"></i> ScriptGen
+        </a>
+    </li>
+</ul>            </div>
+
+            <div>
+
+                <span id="user-email" class="me-3 fw-bold"></span>
+
+                <button id="btn-logout" class="btn btn-danger btn-sm">Logout</button>
+
+            </div>
+        </div>
+
+
+
+        <!-- Area Chart & To Do List -->
+
+        <div class="row mb-4 align-items-stretch">
+
+            <!-- Kiri: Chart ISP (Tinggi) -->
+
+            <div class="col-md-4 d-flex">
+
+                <div class="card p-3 w-100">
+
+                    <h6 class="text-center">Total OLT per ISP</h6>
+
+                    <canvas id="chartISP"></canvas>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Kanan: Chart NMS, Billing, dan To Do List -->
+
+            <div class="col-md-8">
+
+                <div class="row mb-3">
+
+                    <div class="col-md-6">
+
+                        <div class="card p-3 h-100">
+
+                            <h6 class="text-center">Status NMS</h6>
+
+                            <canvas id="chartNMS"></canvas>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="card p-3 h-100">
+
+                            <h6 class="text-center">Status Billing</h6>
+
+                            <canvas id="chartBilling"></canvas>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Area To Do List -->
+
+                <div class="card p-3 shadow-sm mt-3">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                        <h6 class="m-0 fw-bold">📝 To Do List Lapangan</h6>
+
+                        <span class="badge bg-primary rounded-pill" id="todoCount">0</span>
+
+                    </div>
+
+                    <div class="input-group mb-3">
+
+                        <input type="text" id="todoInput" class="form-control"
+
+                            placeholder="Ketik tugas atau perbaikan OLT baru...">
+
+                        <button class="btn btn-primary" type="button" id="btnTodoAdd">Tambah</button>
+
+                    </div>
+
+                    <ul class="list-group list-group-flush" id="todoList" style="max-height: 250px; overflow-y: auto;">
+
+                        <!-- List tugas akan muncul di sini -->
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+        <!-- OLT Script Generator: struktur dan ID dipertahankan agar cocok dengan app.js -->
+        <div id="olt-script-generator" class="generator-container">
+            <div class="generator-header">
+                <div>
+                    <h3>OLT Script Generator</h3>
+                    <p class="generator-description">Upload CSV Huawei OLT, periksa ringkasan data ONU, lalu generate dan download script konfigurasi.</p>
+                </div>
+                <span class="badge bg-primary">CSV · OLT</span>
+            </div>
+
+            <form id="generatorForm" class="generator-form">
+                <div class="form-group">
+                    <label for="hostname">1. Hostname (Nama File Output):</label>
+                    <input type="text" id="hostname" required placeholder="Contoh: OLT-KOTA-A">
+                </div>
+                <div class="form-group">
+                    <label for="slotTujuan">2. Card Tujuan (Slot):</label>
+                    <input type="text" id="slotTujuan" required placeholder="Contoh: 1">
+                </div>
+                <div class="form-group">
+                    <label for="vlanStasiun">3. VLAN Stasiun:</label>
+                    <input type="text" id="vlanStasiun" required placeholder="Contoh: 100">
+                </div>
+                <div class="form-group">
+                    <label for="csvFile">4. Upload File CSV (Export Huawei OLT):</label>
+                    <input type="file" id="csvFile" accept=".csv" required>
+                    <small class="form-text">Pastikan file CSV berasal dari export Huawei OLT dan memiliki kolom Port, ONU ID, serta SN.</small>
+                </div>
+
+                <button type="button" id="previewBtn" class="btn-primary">Hitung &amp; Preview Data</button>
+            </form>
+
+            <div id="summaryBox" class="summary-box" style="display: none; margin-top: 20px;">
+                <h4>Ringkasan Data ONU:</h4>
+                <p id="summaryText"></p>
+                <button type="button" id="generateBtn" class="btn-success">Generate &amp; Download Script</button>
+            </div>
+        </div>
+
+        <!-- Area Tabel Database -->
+
+        <div class="card p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <h5 class="m-0">Data Perangkat & Stasiun</h5>
+
+                <div>
+
+                    <button id="btn-sync" class="btn btn-info btn-sm text-white me-2">🔄 Sinkron Database</button>
+
+                    <button class="btn btn-success btn-sm" onclick="showForm()">+ Tambah Data</button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Kolom Pencarian -->
+
+            <div class="mb-3">
+
+                <input type="text" id="searchInput" class="form-control"
+
+                    placeholder="Cari IP, Nama ISP, POP, atau lainnya...">
+
+            </div>
+
+
+
+            <div class="table-responsive">
+
+                <table class="table table-hover table-bordered text-center align-middle" id="dataTable">
+
+                    <thead class="table-dark">
+
+                        <tr>
+
+                            <th>Nama ISP</th>
+
+                            <th>POP</th>
+
+                            <th>Brand OLT</th>
+
+                            <th>IP</th>
+
+                            <th>Status NMS</th>
+
+                            <th>Traffic</th>
+
+                            <th style="min-width: 180px;">Aksi</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="tableBody">
+
+                        <tr>
+
+                            <td colspan="7">Memuat data dari Google Sheets...</td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Modal Detail Perangkat -->
+
+    <div class="modal fade" id="detailModal" tabindex="-1">
+
+        <div class="modal-dialog modal-lg">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title" id="modalTitle">Detail Perangkat</h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                </div>
+
+                <div class="modal-body" id="modalBody">
+
+                    <!-- Konten detail digenerate via JS -->
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Modal Form Tambah/Edit Data -->
+
+    <div class="modal fade" id="formModal" tabindex="-1">
+
+        <div class="modal-dialog modal-lg">
+
+            <div class="modal-content">
+
+                <form id="dataForm">
+
+                    <div class="modal-header bg-primary text-white">
+
+                        <h5 class="modal-title" id="formModalTitle">Tambah Data Baru</h5>
+
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <input type="hidden" id="formAction" value="insert">
+
+                        <input type="hidden" id="formRowIndex" value="">
+
+
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Nama ISP</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_nama_isp" required>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">POP</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_pop">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Brand OLT</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_brand_olt">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Tipe OLT</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_tipe_olt">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Hostname</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_hostname">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">IP Management</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_ip">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Nama Stasiun</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_nama_stasiun">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Kode Stasiun</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_kode_stasiun">
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Status NMS</label>
+
+                                <select class="form-select form-select-sm" id="f_status_nms">
+
+                                    <option value="Up">Up</option>
+
+                                    <option value="Done">Done</option>
+
+                                    <option value="Down">Down</option>
+
+                                    <option value="NY">NY</option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Billing</label>
+
+                                <select class="form-select form-select-sm" id="f_billing">
+
+                                    <option value="Done">Done</option>
+
+                                    <option value="NY">NY</option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Traffic</label>
+
+                                <select class="form-select form-select-sm" id="f_traffic">
+
+                                    <option value="Migrasi">Migrasi</option>
+
+                                    <option value="Belum">Belum</option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Jumlah Card</label>
+
+                                <input type="number" class="form-control form-control-sm" id="f_jumlah_card">
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Jumlah ONT</label>
+
+                                <input type="number" class="form-control form-control-sm" id="f_jumlah_ont">
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Koordinat</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_koordinat"
+
+                                    placeholder="-6.2000, 106.8166">
+
+                            </div>
+
+                            <div class="col-12">
+
+                                <label class="form-label">Alamat Lengkap</label>
+
+                                <textarea class="form-control form-control-sm" id="f_alamat" rows="2"></textarea>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Remarks</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_remarks">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Link Foto Perangkat</label>
+
+                                <input type="url" class="form-control form-control-sm" id="f_link_foto"
+
+                                    placeholder="https://...">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+
+                        <button type="submit" class="btn btn-primary" id="btnSubmitForm">Simpan Data</button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="app.js"></script>
+
+
+
+
+</body>
+
+
+
+</html>
