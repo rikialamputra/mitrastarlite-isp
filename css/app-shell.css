@@ -111,3 +111,13 @@ html[data-theme="light"] .scriptgen-app .metric-card strong{color:#17263a}
 html[data-theme="light"] .scriptgen-app .csv-empty strong{color:#17263a}
 html[data-theme="light"] .scriptgen-app .csv-form input[type=file]{background:#f7fafc;color:#344054}
 html[data-theme="light"] .scriptgen-app .csv-form input[type=file]::file-selector-button{background:#e2f3f6;color:#075b70}
+
+/* Legacy dashboard list reset and small responsive refinements */
+#dashboard .app-content ul{list-style:none;margin:0;padding:0;overflow:visible;background:transparent}
+#dashboard .app-content ul li{float:none}
+#dashboard .app-content .list-group{border-radius:10px;overflow:auto}
+#dashboard .app-content .card{padding:clamp(14px,1.6vw,22px)!important}
+#dashboard .app-content .card .form-control{min-height:40px}
+#dashboard .app-content #dataTable{font-size:12px}
+#dashboard .app-content #dataTable td,#dashboard .app-content #dataTable th{padding:11px 9px;vertical-align:middle}
+@media(max-width:640px){.sidebar-collapse{opacity:1;right:14px}.app-sidebar.mobile-open .sidebar-collapse{display:grid;place-items:center}}
