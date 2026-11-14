@@ -586,6 +586,8 @@ ul li a:hover {
       <a class="sidebar-link active" href="#page-overview" data-nav="overview"><i class="bi bi-grid-1x2"></i><span>Overview</span></a>
       <a class="sidebar-link" href="#network-monitoring" data-nav="monitoring"><i class="bi bi-activity"></i><span>Monitoring</span></a>
       <a class="sidebar-link" href="#network-inventory" data-nav="inventory"><i class="bi bi-hdd-network"></i><span>Network Inventory</span></a>
+      <a class="sidebar-link" href="#pop-management" data-nav="pop"><i class="bi bi-diagram-3"></i><span>POP Management</span></a>
+      <a class="sidebar-link" href="#analytics" data-nav="analytics"><i class="bi bi-bar-chart-line"></i><span>Analytics</span></a>
       <a class="sidebar-link" href="#field-operations" data-nav="operations"><i class="bi bi-clipboard-check"></i><span>Field Operations</span></a>
       <a class="sidebar-link" href="/scriptgen/" data-nav="scriptgen"><i class="bi bi-terminal"></i><span>Script Generator</span><i class="bi bi-box-arrow-up-right nav-external"></i></a>
     </nav>
@@ -611,7 +613,15 @@ ul li a:hover {
     </header>
     <main class="app-content" id="page-overview">
       <div class="page-intro"><div><div class="page-eyebrow">STARLITE / OVERVIEW</div><h1>Dashboard Overview</h1><p>Ringkasan infrastruktur dan aktivitas operasional jaringan.</p></div><span class="page-live"><i></i> Workspace</span></div>
-      <div id="network-monitoring" class="content-section-anchor"></div>
+      <section id="network-monitoring" class="ops-module">
+<div class="module-heading"><div><div class="page-eyebrow">NETWORK / INVENTORY SNAPSHOT</div><h2>Monitoring Overview</h2><p>Status berdasarkan sinkronisasi database terakhir.</p></div><span class="module-stamp" id="monitoringUpdated">Menunggu data</span></div>
+<div class="row g-3 mb-4">
+<div class="col-6 col-xl"><div class="ops-kpi"><span>Total OLT</span><strong id="kpiTotalOlt">—</strong><small>Terdaftar</small></div></div>
+<div class="col-6 col-xl"><div class="ops-kpi"><span>UP / Online</span><strong class="kpi-good" id="kpiOnline">—</strong><small>Status NMS</small></div></div>
+<div class="col-6 col-xl"><div class="ops-kpi"><span>DOWN / Offline</span><strong class="kpi-bad" id="kpiOffline">—</strong><small>Status NMS</small></div></div>
+<div class="col-6 col-xl"><div class="ops-kpi"><span>Total POP</span><strong id="kpiPop">—</strong><small>Lokasi unik</small></div></div>
+<div class="col-6 col-xl"><div class="ops-kpi"><span>ONT Registered</span><strong id="kpiOnt">—</strong><small>Akumulasi data</small></div></div>
+</div></section>
 <!-- Area Chart & To Do List -->
 
         <div class="row mb-4 align-items-stretch">
@@ -703,7 +713,7 @@ ul li a:hover {
 
 
 
-        <div id="network-inventory" class="content-section-anchor"></div>
+        <section id="network-inventory" class="ops-module"><div class="module-heading"><div><div class="page-eyebrow">ASSET / DEVICE REGISTER</div><h2>Network Inventory</h2><p>Daftar perangkat dan stasiun dalam database operasional.</p></div></div>
 <!-- Area Tabel Database -->
 
         <div class="card p-4">
@@ -726,13 +736,7 @@ ul li a:hover {
 
             <!-- Kolom Pencarian -->
 
-            <div class="mb-3">
-
-                <input type="text" id="searchInput" class="form-control"
-
-                    placeholder="Cari IP, Nama ISP, POP, atau lainnya...">
-
-            </div>
+            <div class="mb-3"><div class="row g-2"><div class="col-lg-6"><input type="text" id="searchInput" class="form-control" placeholder="Cari IP, ISP, POP, hostname, atau lainnya..."></div><div class="col-lg-3"><select id="inventoryPopFilter" class="form-select"><option value="">Semua POP</option></select></div><div class="col-lg-3"><select id="inventoryStatusFilter" class="form-select"><option value="">Semua Status NMS</option><option value="up">UP / Online</option><option value="down">DOWN / Offline</option><option value="other">Lainnya / Unknown</option></select></div></div></div>
 
 
 
@@ -777,12 +781,17 @@ ul li a:hover {
             </div>
 
         </div>
-
-    </div>
-
-
-
-        </main>
+</section>
+<section id="pop-management" class="ops-module">
+<div class="module-heading"><div><div class="page-eyebrow">INFRASTRUCTURE / LOCATIONS</div><h2>POP Management</h2><p>Rekap perangkat berdasarkan lokasi POP dari database.</p></div><span class="module-stamp" id="popCountLabel">0 lokasi</span></div>
+<div class="table-responsive ops-table-wrap"><table class="table align-middle" id="popTable"><thead><tr><th>POP</th><th>ISP</th><th>OLT</th><th>UP</th><th>DOWN</th><th>ONT</th><th>IP Perangkat</th></tr></thead><tbody id="popTableBody"><tr><td colspan="7" class="text-center text-muted">Memuat data...</td></tr></tbody></table></div>
+</section>
+<section id="analytics" class="ops-module">
+<div class="module-heading"><div><div class="page-eyebrow">REPORTING / DISTRIBUTION</div><h2>Network Analytics</h2><p>Komposisi perangkat berdasarkan POP dan brand OLT.</p></div></div>
+<div class="row g-3"><div class="col-lg-6"><div class="ops-chart-card"><h3>Perangkat per POP</h3><div class="ops-chart-area"><canvas id="chartAnalyticsPop"></canvas></div></div></div><div class="col-lg-6"><div class="ops-chart-card"><h3>Distribusi Brand OLT</h3><div class="ops-chart-area"><canvas id="chartAnalyticsBrand"></canvas></div></div></div></div>
+<p class="ops-data-note"><i class="bi bi-info-circle"></i> Data dihitung dari Google Sheets, bukan polling SNMP atau telemetry real-time.</p>
+</section>
+</main>
   </div>
 <!-- Modal Detail Perangkat -->
 
