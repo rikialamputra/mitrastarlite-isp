@@ -10,7 +10,8 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Dashboard OLT Network</title>
+    <title>Mitra ISP Starlite | Network Operations</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/starlite-mark.svg">
 
     <!-- Bootstrap CSS -->
 
@@ -510,6 +511,15 @@ ul li a:hover {
             .card { border-radius: 14px; }
         }
 
+
+        /* Starlite brand identity */
+        .starlite-brand { display:flex; align-items:center; gap:.85rem; min-width:0; }
+        .starlite-brand img { width:46px; height:42px; object-fit:contain; filter:drop-shadow(0 0 12px rgba(54,214,231,.18)); }
+        .starlite-brand h4 { margin:0; font-size:1.25rem; letter-spacing:.18em; font-weight:900; color:#f0f8ff; }
+        .starlite-brand span { display:block; margin-top:.15rem; color:#8faac2; font-size:.62rem; font-weight:750; letter-spacing:.13em; }
+        #dashboard > .d-flex:first-child h4::before { content:none; }
+        #login-page .starlite-login-mark { width:116px; height:102px; object-fit:contain; filter:drop-shadow(0 12px 25px rgba(36,153,232,.2)); }
+
     </style>
 
 </head>
@@ -526,9 +536,9 @@ ul li a:hover {
 
         <div class="text-center">
 
-            <img src="https://via.placeholder.com/150?text=Weave+Logo" alt="Logo" class="mb-4">
+            <img src="/assets/starlite-mark.svg" alt="Starlite" class="mb-3 starlite-login-mark">
 
-            <h2>Login Network Dashboard</h2>
+            <h2>Mitra ISP Starlite</h2>
 
             <p class="text-muted">Gunakan email @weave.co.id untuk masuk</p>
 
@@ -566,7 +576,7 @@ ul li a:hover {
 
         <div class="d-flex justify-content-between align-items-center mb-4">
 
-            <h4>Dashboard OLT ISP</h4>
+            <div class="starlite-brand"><img src="/assets/starlite-mark.svg" alt="Starlite"><div><h4>STARLITE</h4><span>MITRA ISP · NETWORK OPERATIONS</span></div></div>
             <div>
 <ul class="nav nav-pills gap-2">
     <li class="nav-item">
