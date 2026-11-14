@@ -96,7 +96,8 @@ async function fetchData() {
         renderOperationalModules();
     } catch (error) {
         console.error("Error fetching data: ", error);
-        document.getElementById('tableBody').innerHTML = '<tr><td colspan="7" class="text-danger fw-bold">Gagal mengambil data. Cek URL Web App.</td></tr>';
+        const tableBody = document.getElementById('tableBody');
+        if (tableBody) tableBody.innerHTML = '<tr><td colspan="7" class="text-danger fw-bold">Gagal mengambil data. Cek URL Web App.</td></tr>';
         throw error;
     }
 }
@@ -112,6 +113,8 @@ function getBadge(statusText) {
 }
 
 function renderTable(dataToRender = globalData) {
+    const tableBody = document.getElementById('tableBody');
+    if (!tableBody) return;
     let tbody = '';
     if (dataToRender.length === 0) {
         tbody = '<tr><td colspan="7" class="text-center text-muted">Data tidak ditemukan.</td></tr>';
@@ -136,7 +139,7 @@ function renderTable(dataToRender = globalData) {
             `;
         });
     }
-    document.getElementById('tableBody').innerHTML = tbody;
+    tableBody.innerHTML = tbody;
 }
 
 // Menampilkan Detail di Modal
