@@ -12,6 +12,7 @@
 
     <title>Mitra ISP Starlite | Network Operations</title>
     <link rel="icon" type="image/svg+xml" href="/assets/starlite-mark.svg">
+    <link rel="stylesheet" href="/css/app-shell.css">
 
     <!-- Bootstrap CSS -->
 
@@ -572,35 +573,47 @@ ul li a:hover {
 
     <!-- Halaman Dashboard Utama -->
 
-    <div id="dashboard" class="container-fluid py-4">
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-
-            <div class="starlite-brand"><img src="/assets/starlite-mark.svg" alt="Starlite"><div><h4>STARLITE</h4><span>MITRA ISP · NETWORK OPERATIONS</span></div></div>
-            <div>
-<ul class="nav nav-pills gap-2">
-    <li class="nav-item">
-        <a class="nav-link text-secondary fw-semibold px-3" href="/">Home</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link active fw-semibold px-3" href="/scriptgen">
-            <i class="bi bi-terminal me-1"></i> ScriptGen
-        </a>
-    </li>
-</ul>            </div>
-
-            <div>
-
-                <span id="user-email" class="me-3 fw-bold"></span>
-
-                <button id="btn-logout" class="btn btn-danger btn-sm">Logout</button>
-
-            </div>
+    <div id="dashboard" class="starlite-app" data-page="overview">
+  <aside class="app-sidebar" id="appSidebar">
+    <a class="sidebar-brand" href="/" aria-label="Starlite Overview">
+      <img src="/assets/starlite-mark.svg" alt="">
+      <span class="brand-copy"><strong>STARLITE</strong><small>MITRA ISP · NOC</small></span>
+    </a>
+    <button class="sidebar-collapse" type="button" data-sidebar-toggle aria-label="Collapse sidebar" title="Collapse sidebar"><i class="bi bi-layout-sidebar-inset"></i></button>
+    <div class="sidebar-caption">WORKSPACE</div>
+    <nav class="sidebar-nav" aria-label="Navigasi utama">
+      <a class="sidebar-link active" href="#page-overview" data-nav="overview"><i class="bi bi-grid-1x2"></i><span>Overview</span></a>
+      <a class="sidebar-link" href="#network-monitoring" data-nav="monitoring"><i class="bi bi-activity"></i><span>Monitoring</span></a>
+      <a class="sidebar-link" href="#network-inventory" data-nav="inventory"><i class="bi bi-hdd-network"></i><span>Network Inventory</span></a>
+      <a class="sidebar-link" href="#field-operations" data-nav="operations"><i class="bi bi-clipboard-check"></i><span>Field Operations</span></a>
+      <a class="sidebar-link" href="/scriptgen/" data-nav="scriptgen"><i class="bi bi-terminal"></i><span>Script Generator</span><i class="bi bi-box-arrow-up-right nav-external"></i></a>
+    </nav>
+    <div class="sidebar-caption sidebar-caption-spaced">SYSTEM</div>
+    <a class="sidebar-link" href="#system-status" data-nav="system"><i class="bi bi-shield-check"></i><span>System Status</span></a>
+    <div class="sidebar-bottom"><span class="system-pulse"></span><span class="sidebar-status">Workspace active</span><span class="sidebar-version">v2.0</span></div>
+  </aside>
+  <div class="sidebar-backdrop" data-sidebar-close></div>
+  <div class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-leading">
+        <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-label="Open navigation"><i class="bi bi-list"></i></button>
+        <div><div class="topbar-kicker">NETWORK OPERATIONS CENTER</div><div class="topbar-title" id="topbarPageTitle">Overview</div></div>
+      </div>
+      <div class="topbar-actions">
+        <span class="topbar-date-label"><i class="bi bi-clock-history"></i> Operations workspace</span>
+        <div class="theme-control" role="group" aria-label="Theme preference">
+          <button type="button" data-theme-choice="system" aria-label="Use system theme" title="System"><i class="bi bi-display"></i></button>
+          <button type="button" data-theme-choice="light" aria-label="Use light theme" title="Light"><i class="bi bi-sun"></i></button>
+          <button type="button" data-theme-choice="dark" aria-label="Use dark theme" title="Dark"><i class="bi bi-moon-stars"></i></button>
         </div>
-
-
-
-        <!-- Area Chart & To Do List -->
+        <div class="topbar-user"><span class="user-avatar"><i class="bi bi-person"></i></span><span id="user-email" class="user-email"></span></div>
+        <button id="btn-logout" class="btn btn-sm btn-outline-danger topbar-logout"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button>
+      </div>
+    </header>
+    <main class="app-content" id="page-overview">
+      <div class="page-intro"><div><div class="page-eyebrow">STarlite / OVERVIEW</div><h1>Dashboard Overview</h1><p>Ringkasan infrastruktur dan aktivitas operasional jaringan.</p></div><span class="page-live"><i></i> Workspace</span></div>
+      <div id="network-monitoring" class="content-section-anchor"></div>
+<!-- Area Chart & To Do List -->
 
         <div class="row mb-4 align-items-stretch">
 
@@ -691,7 +704,8 @@ ul li a:hover {
 
 
 
-        <!-- Area Tabel Database -->
+        <div id="field-operations" class="content-section-anchor"></div>
+<!-- Area Tabel Database -->
 
         <div class="card p-4">
 
@@ -769,7 +783,9 @@ ul li a:hover {
 
 
 
-    <!-- Modal Detail Perangkat -->
+        </main>
+  </div>
+<!-- Modal Detail Perangkat -->
 
     <div class="modal fade" id="detailModal" tabindex="-1">
 
@@ -1014,6 +1030,7 @@ ul li a:hover {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="app.js"></script>
+    <script src="/js/app-shell.js"></script>
 
 
 
