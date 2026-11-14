@@ -171,3 +171,53 @@ html[data-theme="light"] #dashboard #dataTable.table-hover>tbody>tr:hover>*{
 html[data-theme="light"] #dashboard #dataTable.table-hover>tbody>tr:hover a,
 html[data-theme="light"] #dashboard #dataTable.table-hover>tbody>tr:hover .text-muted,
 html[data-theme="light"] #dashboard #dataTable.table-hover>tbody>tr:hover small{color:#17263a!important}
+
+
+/* ScriptGen: readable hover, focus and interactive states in both themes */
+.scriptgen-app .tool-tab:hover,
+.scriptgen-app .tool-tab:focus-visible{color:var(--st-text)!important;background:color-mix(in srgb,var(--st-cyan) 12%,var(--st-panel))!important;border-color:color-mix(in srgb,var(--st-cyan) 28%,var(--st-line))!important}
+.scriptgen-app .tool-tab:hover strong,.scriptgen-app .tool-tab:focus-visible strong{color:var(--st-text)!important}
+.scriptgen-app .tool-tab:hover small,.scriptgen-app .tool-tab:focus-visible small{color:var(--st-muted)!important}
+.scriptgen-app .tool-tab.active{color:var(--st-text)!important}
+.scriptgen-app .field-label,.scriptgen-app .section-title,.scriptgen-app .panel h2{color:var(--st-text)!important}
+.scriptgen-app .panel-footnote,.scriptgen-app .csv-hint,.scriptgen-app .csv-description,.scriptgen-app .csv-empty p,.scriptgen-app .tip p{color:var(--st-muted)!important}
+.scriptgen-app .tip strong,.scriptgen-app .csv-empty strong{color:var(--st-text)!important}
+.scriptgen-app select,.scriptgen-app input:not([type=file]){background:var(--st-panel-2)!important;color:var(--st-text)!important;border-color:var(--st-line)!important}
+.scriptgen-app select option{background:var(--st-panel-2);color:var(--st-text)}
+.scriptgen-app input::placeholder{color:var(--st-muted)!important;opacity:.9}
+.scriptgen-app select:hover,.scriptgen-app input:hover{border-color:var(--st-cyan)!important}
+.scriptgen-app select:focus,.scriptgen-app input:focus{border-color:var(--st-cyan)!important;box-shadow:0 0 0 .2rem color-mix(in srgb,var(--st-cyan) 18%,transparent)!important}
+.scriptgen-app .secondary-button{background:var(--st-panel-2)!important;color:var(--st-text)!important;border-color:var(--st-line)!important}
+.scriptgen-app .secondary-button:hover:not(:disabled){background:color-mix(in srgb,var(--st-cyan) 16%,var(--st-panel-2))!important;color:var(--st-text)!important;border-color:var(--st-cyan)!important}
+.scriptgen-app .csv-status{color:var(--st-text)!important}
+.scriptgen-app .csv-summary .summary-topline{color:var(--st-cyan)!important}
+.scriptgen-app .csv-summary .summary-topline span:last-child{color:var(--st-muted)!important}
+.scriptgen-app .metric-card span{color:var(--st-muted)!important}
+.scriptgen-app .metric-card strong{color:var(--st-text)!important}
+.scriptgen-app .csv-form input[type=file]{background:var(--st-panel-2)!important;color:var(--st-text)!important;border-color:var(--st-line)!important}
+.scriptgen-app .csv-form input[type=file]::file-selector-button{background:color-mix(in srgb,var(--st-cyan) 16%,var(--st-panel-2))!important;color:var(--st-text)!important}
+.scriptgen-app .terminal{background:#07101c;border-color:#263d55}
+.scriptgen-app .terminal-bar{background:#101d2e;border-color:#263d55;color:#c2d2e4}
+.scriptgen-app .terminal-language{color:#9deaf0}
+.scriptgen-app .line-numbers{color:#8ba0b7}
+.scriptgen-app .code-wrap pre{color:#e5f2ff}
+html[data-theme="light"] .scriptgen-app .tool-tab:hover,
+html[data-theme="light"] .scriptgen-app .tool-tab:focus-visible{background:#e8f5f8!important;color:#17263a!important;border-color:#a9dce3!important}
+html[data-theme="light"] .scriptgen-app .tool-tab:hover strong,
+html[data-theme="light"] .scriptgen-app .tool-tab:focus-visible strong{color:#17263a!important}
+html[data-theme="light"] .scriptgen-app .tool-tab:hover small,
+html[data-theme="light"] .scriptgen-app .tool-tab:focus-visible small{color:#52677e!important}
+html[data-theme="light"] .scriptgen-app .field-label,
+html[data-theme="light"] .scriptgen-app .section-title,
+html[data-theme="light"] .scriptgen-app .panel h2{color:#17263a!important}
+html[data-theme="light"] .scriptgen-app .panel-footnote,
+html[data-theme="light"] .scriptgen-app .csv-hint,
+html[data-theme="light"] .scriptgen-app .csv-description,
+html[data-theme="light"] .scriptgen-app .csv-empty p,
+html[data-theme="light"] .scriptgen-app .tip p{color:#52677e!important}
+html[data-theme="light"] .scriptgen-app .tip strong,
+html[data-theme="light"] .scriptgen-app .csv-empty strong{color:#17263a!important}
+html[data-theme="light"] .scriptgen-app .secondary-button{background:#f3f7fb!important;color:#17263a!important;border-color:#cbd8e5!important}
+html[data-theme="light"] .scriptgen-app .secondary-button:hover:not(:disabled){background:#e3f2f6!important;color:#123044!important;border-color:#087e9b!important}
+html[data-theme="light"] .scriptgen-app .csv-status{color:#344b61!important}
+html[data-theme="light"] .scriptgen-app .metric-card strong{color:#17263a!important}
