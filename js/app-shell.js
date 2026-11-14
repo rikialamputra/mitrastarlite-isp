@@ -31,6 +31,7 @@
     if(link.getAttribute("href")?.startsWith("#")){
       root.querySelectorAll(".sidebar-link").forEach(x=>x.classList.remove("active"));link.classList.add("active");
       const label=link.querySelector("span")?.textContent;if(label&&root.querySelector("#topbarPageTitle"))root.querySelector("#topbarPageTitle").textContent=label;
+    const eyebrow=root.querySelector(".page-intro .page-eyebrow");if(eyebrow)eyebrow.textContent="STARLITE / "+label.toUpperCase();
     }
     closeMobile();
   }));
