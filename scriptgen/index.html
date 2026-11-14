@@ -5,22 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>OLT Script Generator</title>
   <link rel="stylesheet" href="/scriptgen/style.css">
+  <link rel="stylesheet" href="/css/app-shell.css">
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="../index.html" aria-label="Network Tools - Beranda">
-        <span class="brand-mark">OLT</span>
-        <span><strong>Network Tools</strong><small>OLT Configuration Suite</small></span>
+  <div class="starlite-app scriptgen-app" data-page="scriptgen">
+    <aside class="app-sidebar" id="appSidebar">
+      <a class="sidebar-brand" href="/" aria-label="Starlite Overview">
+        <img src="/assets/starlite-mark.svg" alt="">
+        <span class="brand-copy"><strong>STARLITE</strong><small>MITRA ISP · NOC</small></span>
       </a>
-      <nav class="main-nav" aria-label="Navigasi utama">
-        <a class="nav-link" href="../index.html"><span aria-hidden="true">⌂</span> Beranda</a>
-        <a class="nav-link active" href="index.html" aria-current="page"><span aria-hidden="true">⌘</span> Script Generator</a>
+      <button class="sidebar-collapse" type="button" data-sidebar-toggle aria-label="Collapse sidebar" title="Collapse sidebar"><i class="bi bi-layout-sidebar-inset"></i></button>
+      <div class="sidebar-caption">WORKSPACE</div>
+      <nav class="sidebar-nav" aria-label="Navigasi utama">
+        <a class="sidebar-link" href="/" data-nav="overview"><i class="bi bi-grid-1x2"></i><span>Overview</span></a>
+        <a class="sidebar-link" href="/#network-monitoring" data-nav="monitoring"><i class="bi bi-activity"></i><span>Monitoring</span></a>
+        <a class="sidebar-link" href="/#network-inventory" data-nav="inventory"><i class="bi bi-hdd-network"></i><span>Network Inventory</span></a>
+        <a class="sidebar-link" href="/#field-operations" data-nav="operations"><i class="bi bi-clipboard-check"></i><span>Field Operations</span></a>
+        <a class="sidebar-link active" href="/scriptgen/" data-nav="scriptgen" aria-current="page"><i class="bi bi-terminal"></i><span>Script Generator</span></a>
       </nav>
-      <span class="topbar-tag"><span class="status-dot"></span> Local Generator</span>
-    </header>
-
-    <main>
+      <div class="sidebar-caption sidebar-caption-spaced">SYSTEM</div>
+      <a class="sidebar-link" href="/#system-status" data-nav="system"><i class="bi bi-shield-check"></i><span>System Status</span></a>
+      <div class="sidebar-bottom"><span class="system-pulse"></span><span class="sidebar-status">Workspace active</span><span class="sidebar-version">v2.0</span></div>
+    </aside>
+    <div class="sidebar-backdrop" data-sidebar-close></div>
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-leading">
+          <button class="mobile-menu-toggle" type="button" data-mobile-menu aria-label="Open navigation"><i class="bi bi-list"></i></button>
+          <div><div class="topbar-kicker">NETWORK OPERATIONS CENTER</div><div class="topbar-title">Script Generator</div></div>
+        </div>
+        <div class="topbar-actions">
+          <span class="topbar-date-label"><i class="bi bi-terminal"></i> Configuration workspace</span>
+          <div class="theme-control" role="group" aria-label="Theme preference">
+            <button type="button" data-theme-choice="system" aria-label="Use system theme" title="System"><i class="bi bi-display"></i></button>
+            <button type="button" data-theme-choice="light" aria-label="Use light theme" title="Light"><i class="bi bi-sun"></i></button>
+            <button type="button" data-theme-choice="dark" aria-label="Use dark theme" title="Dark"><i class="bi bi-moon-stars"></i></button>
+          </div>
+          <a class="topbar-home-link" href="/"><i class="bi bi-house"></i><span>Overview</span></a>
+        </div>
+      </header>
+      <main class="app-content scriptgen-content">
+        <div class="page-intro"><div><div class="page-eyebrow">OPERATIONS / AUTOMATION</div><h1>Script Generator</h1><p>Bangun konfigurasi perangkat jaringan dengan template vendor atau import data ONU Huawei.</p></div><span class="page-live"><i></i> Local tools</span></div>
       <section class="intro">
         <div class="eyebrow">NETWORK AUTOMATION / CONFIG BUILDER</div>
         <h1>OLT Script Generator</h1>
@@ -152,8 +177,8 @@
           </div>
         </section>
       </section>
-    </main>
-    <footer>STARLITE NETWORK TOOLS <span>•</span>Created by AlamHost</footer>
+      </main>
+    </div>
   </div>
   <script src="/scriptgen/script.js"></script>
   <script src="/scriptgen/hwi-generator.js"></script>
@@ -175,5 +200,6 @@ document.querySelectorAll(".tool-tab").forEach((tab) => {
   });
 });
 </script>
+  <script src="/js/app-shell.js"></script>
 </body>
 </html>
