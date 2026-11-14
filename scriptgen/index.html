@@ -27,6 +27,16 @@
         <p>Buat konfigurasi OLT dengan parameter yang dinamis. Preview script langsung di halaman ini, lalu salin tanpa mengunduh file.</p>
       </section>
 
+      <section class="tool-switcher" aria-label="Pilih jenis generator">
+        <button class="tool-tab active" type="button" data-tool="vendor-tool" aria-selected="true">
+          <span class="tool-tab-icon">⌘</span><span><strong>Vendor ScriptGen</strong><small>Huawei · Fiberhome · Nokia</small></span>
+        </button>
+        <button class="tool-tab" type="button" data-tool="csv-tool" aria-selected="false">
+          <span class="tool-tab-icon">⇧</span><span><strong>Huawei CSV Generator</strong><small>Import ONU · Generate konfigurasi</small></span>
+        </button>
+      </section>
+
+      <section id="vendor-tool" class="tool-panel active">
       <section class="workspace">
         <aside class="panel config-panel">
           <div class="panel-heading">
@@ -99,9 +109,72 @@
           <div class="tip"><span class="tip-icon">i</span><p><strong>Periksa kembali sebelum digunakan.</strong> Script ini dibuat dari template yang kamu berikan. Validasi sintaks dan kompatibilitas dengan versi firmware OLT sebelum menjalankannya.</p></div>
         </section>
       </section>
+      </section>
+
+      <section id="csv-tool" class="tool-panel" hidden>
+        <section class="csv-workspace">
+          <div class="panel config-panel csv-config">
+            <div class="panel-heading">
+              <div><span class="step-label">HUAWEI / CSV IMPORT</span><h2>ONU Configuration Builder</h2></div>
+              <span class="heading-icon">⇧</span>
+            </div>
+            <p class="csv-description">Upload file export Huawei OLT untuk membaca data ONU, memeriksa ringkasan, lalu membangun script konfigurasi secara otomatis.</p>
+            <form id="generatorForm" class="csv-form">
+              <label class="field-label" for="hostname">Hostname / Nama File</label>
+              <input type="text" id="hostname" required placeholder="Contoh: OLT-KOTA-A">
+              <label class="field-label" for="slotTujuan">Card Tujuan (Slot)</label>
+              <input type="text" id="slotTujuan" required placeholder="Contoh: 1" inputmode="numeric">
+              <label class="field-label" for="vlanStasiun">VLAN Stasiun</label>
+              <input type="text" id="vlanStasiun" required placeholder="Contoh: 100" inputmode="numeric">
+              <label class="field-label" for="csvFile">File CSV Export Huawei</label>
+              <input type="file" id="csvFile" accept=".csv,text/csv" required>
+              <small class="csv-hint">Kolom wajib: Port, ONU ID, dan SN. Kolom Alias/Name serta Status akan dibaca jika tersedia.</small>
+              <button type="button" id="previewBtn" class="primary-button"><span>Analisis File & Preview</span><span>→</span></button>
+            </form>
+            <div id="csvNotice" class="notice" role="alert"></div>
+          </div>
+
+          <div class="panel preview-panel csv-preview">
+            <div class="preview-heading">
+              <div><span class="step-label">STEP 02</span><h2>ONU Summary</h2><p>Validasi hasil parsing sebelum generate script.</p></div>
+              <span class="csv-status"><i></i> CSV PARSER</span>
+            </div>
+            <div id="summaryBox" class="csv-summary" hidden>
+              <div class="summary-topline"><span>HASIL ANALISIS</span><span id="csvFileName">CSV IMPORT</span></div>
+              <div id="summaryText" class="summary-metrics"></div>
+              <button type="button" id="generateBtn" class="primary-button"><span>Generate & Download Script</span><span>↓</span></button>
+            </div>
+            <div id="csvEmptyState" class="csv-empty">
+              <span class="empty-icon">⇧</span><strong>Belum ada data ONU</strong>
+              <p>Lengkapi parameter dan upload CSV Huawei, kemudian jalankan analisis untuk melihat ringkasan ONU.</p>
+            </div>
+            <div class="tip"><span class="tip-icon">i</span><p><strong>Catatan operasional.</strong> Periksa kembali slot, VLAN, SN, dan alias ONU. Validasi hasil script serta kompatibilitas firmware sebelum diterapkan ke OLT produksi.</p></div>
+          </div>
+        </section>
+      </section>
     </main>
-    <footer>OLT Tools <span>•</span>Created by AlamHost</footer>
+    <footer>STARLITE NETWORK TOOLS <span>•</span>Created by AlamHost</footer>
   </div>
   <script src="script.js"></script>
+  <script src="hwi-generator.js"></script>
+  <script>
+// ScriptGen tool switcher
+document.querySelectorAll(".tool-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    const target = tab.dataset.tool;
+    document.querySelectorAll(".tool-tab").forEach((item) => {
+      const active = item === tab;
+      item.classList.toggle("active", active);
+      item.setAttribute("aria-selected", String(active));
+    });
+    document.querySelectorAll(".tool-panel").forEach((panel) => {
+      const active = panel.id === target;
+      panel.classList.toggle("active", active);
+      panel.hidden = !active;
+    });
+  });
+});
+</script>
+  <script src="hwi-generator.js"></script>
 </body>
 </html>
