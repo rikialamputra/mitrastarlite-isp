@@ -1,0 +1,357 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Network Inventory | Mitra ISP Starlite</title><link rel="icon" href="/assets/starlite-mark.svg"><link rel="stylesheet" href="/css/app-shell.css"><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><style>body{background:#08111f;color:#e8f2ff}#dashboard{display:none}.card{border:1px solid rgba(148,180,210,.16);border-radius:16px;background:#101d2e;color:#e8f2ff}.form-control,.form-select{background:#0a1727;color:#e7f2ff;border-color:#29415a}.table{--bs-table-bg:transparent;--bs-table-color:#dceafa;--bs-table-border-color:rgba(148,180,210,.13)}.table thead th{color:#9deaf0;background:#0b1b2c}.ops-module{margin:8px 0 34px}.module-heading{display:flex;justify-content:space-between;gap:18px;margin:8px 0 18px}.module-heading h2{font-size:21px;font-weight:800}.ops-kpi,.ops-table-wrap,.ops-chart-card{padding:17px;border:1px solid var(--st-line);border-radius:14px;background:var(--st-panel)}.ops-kpi span,.ops-kpi small{display:block;color:var(--st-muted);font-size:10px}.ops-kpi strong{display:block;margin:10px 0;color:var(--st-text);font-size:27px}.ops-chart-area{height:270px;position:relative}.ops-status-up{color:#36b77b}.ops-status-down{color:#ed7078}.ops-ip-list{max-width:220px;overflow-wrap:anywhere}</style></head><body><!-- Halaman Login dengan Input Email (Passwordless) -->
+
+    <div id="login-page" class="container mt-5" style="max-width: 400px;">
+
+        <div class="text-center">
+
+            <img src="/assets/starlite-mark.svg" alt="Starlite" class="mb-3 starlite-login-mark">
+
+            <h2>Mitra ISP Starlite</h2>
+
+            <p class="text-muted">Gunakan email @weave.co.id untuk masuk</p>
+
+        </div>
+
+
+
+        <div class="card p-4 mt-3">
+
+            <form id="login-form">
+
+                <div class="mb-3">
+
+                    <label for="emailInput" class="form-label">Email Akses</label>
+
+                    <input type="email" class="form-control" id="emailInput" placeholder="nama@weave.co.id" required>
+
+                </div>
+
+                <button type="submit" id="btn-login" class="btn btn-primary w-100">Kirim Link Login</button>
+
+            </form>
+
+            <div id="login-message" class="mt-3 text-center" style="display: none;"></div>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="dashboard" class="starlite-app" data-page="inventory"><aside class="app-sidebar" id="appSidebar"><a class="sidebar-brand" href="/"><img src="/assets/starlite-mark.svg" alt=""><span class="brand-copy"><strong>STARLITE</strong><small>MITRA ISP · NOC</small></span></a><button class="sidebar-collapse" type="button" data-sidebar-toggle aria-label="Collapse sidebar"><i class="bi bi-layout-sidebar-inset"></i></button><div class="sidebar-caption">WORKSPACE</div><nav class="sidebar-nav" aria-label="Navigasi utama"><a class="sidebar-link " href="/" data-nav="overview" ><i class="bi bi-grid-1x2"></i><span>Overview</span></a>
+<a class="sidebar-link " href="/monitoring/" data-nav="monitoring" ><i class="bi bi-activity"></i><span>Monitoring</span></a>
+<a class="sidebar-link active" href="/inventory/" data-nav="inventory" aria-current="page"><i class="bi bi-hdd-network"></i><span>Network Inventory</span></a>
+<a class="sidebar-link " href="/pops/" data-nav="pop" ><i class="bi bi-diagram-3"></i><span>POP Management</span></a>
+<a class="sidebar-link " href="/analytics/" data-nav="analytics" ><i class="bi bi-bar-chart-line"></i><span>Analytics</span></a>
+<a class="sidebar-link " href="/operations/" data-nav="operations" ><i class="bi bi-clipboard-check"></i><span>Field Operations</span></a>
+<a class="sidebar-link " href="/scriptgen/" data-nav="scriptgen" ><i class="bi bi-terminal"></i><span>Script Generator</span></a></nav><div class="sidebar-bottom"><span class="system-pulse"></span><span class="sidebar-status">Workspace active</span><span class="sidebar-version">v2.0</span></div></aside><div class="sidebar-backdrop" data-sidebar-close></div><div class="app-main"><header class="app-topbar"><div class="topbar-leading"><button class="mobile-menu-toggle" type="button" data-mobile-menu aria-label="Open navigation"><i class="bi bi-list"></i></button><div><div class="topbar-kicker">NETWORK OPERATIONS CENTER</div><div class="topbar-title" id="topbarPageTitle">Network Inventory</div></div></div><div class="topbar-actions"><span class="topbar-date-label">Operations workspace</span><div class="theme-control" role="group" aria-label="Theme preference"><button type="button" data-theme-choice="system" title="System"><i class="bi bi-display"></i></button><button type="button" data-theme-choice="light" title="Light"><i class="bi bi-sun"></i></button><button type="button" data-theme-choice="dark" title="Dark"><i class="bi bi-moon-stars"></i></button></div><div class="topbar-user"><span id="user-email" class="user-email"></span></div><button id="btn-logout" class="btn btn-sm btn-outline-danger topbar-logout"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button></div></header><main class="app-content"><div class="page-intro"><div><div class="page-eyebrow">STARLITE / NETWORK INVENTORY</div><h1>Network Inventory</h1><p>Kelola data perangkat dan stasiun jaringan.</p></div><span class="page-live"><i></i> Workspace</span></div><section id="network-inventory" class="ops-module"><div class="module-heading"><div><div class="page-eyebrow">ASSET / DEVICE REGISTER</div><h2>Network Inventory</h2><p>Daftar perangkat dan stasiun dalam database operasional.</p></div></div>
+<!-- Area Tabel Database -->
+
+        <div class="card p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <h5 class="m-0">Data Perangkat & Stasiun</h5>
+
+                <div>
+
+                    <button id="btn-sync" class="btn btn-info btn-sm text-white me-2">🔄 Sinkron Database</button>
+
+                    <button class="btn btn-success btn-sm" onclick="showForm()">+ Tambah Data</button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Kolom Pencarian -->
+
+            <div class="mb-3"><div class="row g-2"><div class="col-lg-6"><input type="text" id="searchInput" class="form-control" placeholder="Cari IP, ISP, POP, hostname, atau lainnya..."></div><div class="col-lg-3"><select id="inventoryPopFilter" class="form-select"><option value="">Semua POP</option></select></div><div class="col-lg-3"><select id="inventoryStatusFilter" class="form-select"><option value="">Semua Status NMS</option><option value="up">UP / Online</option><option value="down">DOWN / Offline</option><option value="other">Lainnya / Unknown</option></select></div></div></div>
+
+
+
+            <div class="table-responsive">
+
+                <table class="table table-hover table-bordered text-center align-middle" id="dataTable">
+
+                    <thead class="table-dark">
+
+                        <tr>
+
+                            <th>Nama ISP</th>
+
+                            <th>POP</th>
+
+                            <th>Brand OLT</th>
+
+                            <th>IP</th>
+
+                            <th>Status NMS</th>
+
+                            <th>Traffic</th>
+
+                            <th style="min-width: 180px;">Aksi</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="tableBody">
+
+                        <tr>
+
+                            <td colspan="7">Memuat data dari Google Sheets...</td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+</section><!-- Modal Detail Perangkat -->
+
+    <div class="modal fade" id="detailModal" tabindex="-1">
+
+        <div class="modal-dialog modal-lg">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title" id="modalTitle">Detail Perangkat</h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                </div>
+
+                <div class="modal-body" id="modalBody">
+
+                    <!-- Konten detail digenerate via JS -->
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Modal Form Tambah/Edit Data -->
+
+    <div class="modal fade" id="formModal" tabindex="-1">
+
+        <div class="modal-dialog modal-lg">
+
+            <div class="modal-content">
+
+                <form id="dataForm">
+
+                    <div class="modal-header bg-primary text-white">
+
+                        <h5 class="modal-title" id="formModalTitle">Tambah Data Baru</h5>
+
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <input type="hidden" id="formAction" value="insert">
+
+                        <input type="hidden" id="formRowIndex" value="">
+
+
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Nama ISP</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_nama_isp" required>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">POP</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_pop">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Brand OLT</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_brand_olt">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Tipe OLT</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_tipe_olt">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Hostname</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_hostname">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">IP Management</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_ip">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Nama Stasiun</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_nama_stasiun">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Kode Stasiun</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_kode_stasiun">
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Status NMS</label>
+
+                                <select class="form-select form-select-sm" id="f_status_nms">
+
+                                    <option value="Up">Up</option>
+
+                                    <option value="Done">Done</option>
+
+                                    <option value="Down">Down</option>
+
+                                    <option value="NY">NY</option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Billing</label>
+
+                                <select class="form-select form-select-sm" id="f_billing">
+
+                                    <option value="Done">Done</option>
+
+                                    <option value="NY">NY</option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Traffic</label>
+
+                                <select class="form-select form-select-sm" id="f_traffic">
+
+                                    <option value="Migrasi">Migrasi</option>
+
+                                    <option value="Belum">Belum</option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Jumlah Card</label>
+
+                                <input type="number" class="form-control form-control-sm" id="f_jumlah_card">
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Jumlah ONT</label>
+
+                                <input type="number" class="form-control form-control-sm" id="f_jumlah_ont">
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">Koordinat</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_koordinat"
+
+                                    placeholder="-6.2000, 106.8166">
+
+                            </div>
+
+                            <div class="col-12">
+
+                                <label class="form-label">Alamat Lengkap</label>
+
+                                <textarea class="form-control form-control-sm" id="f_alamat" rows="2"></textarea>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Remarks</label>
+
+                                <input type="text" class="form-control form-control-sm" id="f_remarks">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Link Foto Perangkat</label>
+
+                                <input type="url" class="form-control form-control-sm" id="f_link_foto"
+
+                                    placeholder="https://...">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+
+                        <button type="submit" class="btn btn-primary" id="btnSubmitForm">Simpan Data</button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    </main></div></div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script><script src="/app.js"></script><script src="/js/app-shell.js"></script></body></html>
