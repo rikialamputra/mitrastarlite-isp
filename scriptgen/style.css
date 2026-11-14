@@ -106,3 +106,47 @@ footer span { color: #52668f; }
   .line-numbers { flex-basis: 37px; font-size: 11px; padding-right: 9px; }
   .preview-footer { flex-direction: column; }
 }
+
+
+/* ===== Unified ScriptGen workspace ===== */
+.tool-switcher{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 20px;padding:7px;border:1px solid rgba(148,180,210,.16);border-radius:16px;background:rgba(8,17,31,.72)}
+.tool-tab{display:flex;align-items:center;gap:13px;text-align:left;padding:14px 16px;border:1px solid transparent;border-radius:11px;background:transparent;color:var(--muted);cursor:pointer;transition:.2s ease}
+.tool-tab:hover{background:rgba(255,255,255,.035);color:var(--text)}
+.tool-tab.active{color:var(--text);border-color:rgba(54,214,231,.32);background:linear-gradient(120deg,rgba(54,214,231,.13),rgba(125,233,199,.06));box-shadow:inset 0 1px rgba(255,255,255,.04)}
+.tool-tab-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border:1px solid rgba(54,214,231,.22);border-radius:10px;color:var(--accent);font-size:19px;background:rgba(54,214,231,.07)}
+.tool-tab strong,.tool-tab small{display:block}
+.tool-tab strong{font-size:12px;font-weight:800}
+.tool-tab small{margin-top:4px;color:var(--muted);font-size:10px}
+.tool-panel[hidden]{display:none!important}
+.csv-workspace{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:20px;align-items:start}
+.csv-config,.csv-preview{min-width:0}
+.csv-description{margin:16px 0 4px;color:var(--muted);font-size:12px;line-height:1.8}
+.csv-form{display:flex;flex-direction:column}
+.csv-form .field-label{margin:18px 0 8px}
+.csv-form input{width:100%;min-height:44px;padding:0 12px;border:1px solid #34415d;border-radius:9px;background:#0c1324;color:var(--text);font:inherit;font-size:12px;outline:none}
+.csv-form input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #36d6e71f}
+.csv-form input[type=file]{height:auto;padding:9px;border-style:dashed;color:#aab6cd}
+.csv-form input[type=file]::file-selector-button{margin-right:10px;padding:7px 10px;border:0;border-radius:7px;background:rgba(54,214,231,.13);color:#9deaf0;font:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.csv-hint{margin-top:10px;color:#8190aa;font-size:10px;line-height:1.7}
+.csv-form .primary-button{margin-top:20px}
+.csv-status{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:999px;color:#aab6cd;font:700 9px 'DM Mono',monospace;letter-spacing:.8px}
+.csv-status i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px #b6f36a77}
+.csv-summary{padding:18px;border:1px solid rgba(54,214,231,.25);border-radius:13px;background:linear-gradient(145deg,rgba(54,214,231,.09),rgba(17,29,46,.55))}
+.csv-summary[hidden]{display:none!important}
+.summary-topline{display:flex;justify-content:space-between;gap:12px;color:#8cebf0;font:800 9px 'DM Mono',monospace;letter-spacing:1px}
+.summary-topline span:last-child{color:#8190aa;overflow-wrap:anywhere;text-align:right}
+.summary-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}
+.metric-card{padding:14px;border:1px solid rgba(148,180,210,.14);border-radius:10px;background:rgba(7,17,30,.55)}
+.metric-card span{display:block;color:var(--muted);font-size:10px}
+.metric-card strong{display:block;margin-top:7px;color:#e8f2ff;font:700 23px 'DM Mono',monospace}
+.metric-card.online strong{color:var(--green)}
+.metric-card.offline strong{color:#fca5a5}
+.csv-summary .primary-button{margin-top:6px}
+.csv-empty{min-height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;color:var(--muted)}
+.csv-empty[hidden]{display:none!important}
+.empty-icon{display:grid;place-items:center;width:54px;height:54px;margin-bottom:15px;border:1px dashed #3b5870;border-radius:16px;color:var(--accent);font-size:25px;background:rgba(54,214,231,.05)}
+.csv-empty strong{color:#dceafa;font-size:13px}
+.csv-empty p{max-width:330px;margin:8px 0 0;font-size:11px;line-height:1.8}
+.csv-preview .tip{margin-top:20px}
+@media(max-width:900px){.csv-workspace{grid-template-columns:1fr}}
+@media(max-width:560px){.tool-switcher{grid-template-columns:1fr}.tool-tab{padding:12px}.summary-metrics{grid-template-columns:1fr 1fr}.summary-topline{font-size:8px}}
