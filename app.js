@@ -92,6 +92,7 @@ async function fetchData() {
 
         renderTable();
         renderCharts();
+        renderOperationalModules();
     } catch (error) {
         console.error("Error fetching data: ", error);
         document.getElementById('tableBody').innerHTML = '<tr><td colspan="7" class="text-danger fw-bold">Gagal mengambil data. Cek URL Web App.</td></tr>';
@@ -585,6 +586,36 @@ function downloadTextFile(content, filename) {
     URL.revokeObjectURL(url);
 }
 
+// --- 13. OPERATIONAL MODULES: MONITORING, POP & ANALYTICS ---
+let analyticsPopChart=null, analyticsBrandChart=null, inventoryFiltersBound=false;
+function opsText(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function opsStatus(v){const s=String(v??'').trim().toLowerCase();if(['up','online','connected','ok'].includes(s))return'up';if(['down','offline','disconnected'].includes(s))return'down';return'other';}
+function opsNumber(v){const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0;}
+function opsGroups(rows,field){return rows.reduce((o,r)=>{const k=String(r[field]||'Belum ditentukan').trim();(o[k]||(o[k]=[])).push(r);return o;},{});}
+function renderOperationalModules(){
+ const rows=globalData||[], online=rows.filter(r=>opsStatus(r['Status NMS'])==='up').length, offline=rows.filter(r=>opsStatus(r['Status NMS'])==='down').length, pops=opsGroups(rows,'POP'), ont=rows.reduce((s,r)=>s+opsNumber(r['Jumlah ont regist']),0);
+ const put=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+ put('kpiTotalOlt',rows.length.toLocaleString('id-ID'));put('kpiOnline',online.toLocaleString('id-ID'));put('kpiOffline',offline.toLocaleString('id-ID'));put('kpiPop',Object.keys(pops).filter(x=>x!=='Belum ditentukan').length.toLocaleString('id-ID'));put('kpiOnt',ont.toLocaleString('id-ID'));
+ put('monitoringUpdated','Snapshot · '+new Date().toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}));
+ renderPopTable(pops);renderInventoryPopOptions(pops);renderAnalyticsCharts(pops);
+ if(!inventoryFiltersBound){
+  const search=document.getElementById('searchInput'), pop=document.getElementById('inventoryPopFilter'), status=document.getElementById('inventoryStatusFilter');
+  const apply=()=>{const q=(search?.value||'').trim().toLowerCase(),p=pop?.value||'',st=status?.value||'';renderTable(rows.filter(r=>(!q||Object.values(r).some(v=>String(v??'').toLowerCase().includes(q)))&&(!p||String(r['POP']||'').trim()===p)&&(!st||(st==='other'?opsStatus(r['Status NMS'])==='other':opsStatus(r['Status NMS'])===st))));};
+  search?.addEventListener('input',apply);pop?.addEventListener('change',apply);status?.addEventListener('change',apply);inventoryFiltersBound=true;
+ }
+}
+function renderInventoryPopOptions(groups){const el=document.getElementById('inventoryPopFilter');if(!el)return;const old=el.value;el.innerHTML='<option value="">Semua POP</option>'+Object.keys(groups).sort((a,b)=>a.localeCompare(b,'id')).map(n=>'<option value="'+opsText(n)+'">'+opsText(n)+'</option>').join('');el.value=old;}
+function renderPopTable(groups){
+ const body=document.getElementById('popTableBody');if(!body)return;const names=Object.keys(groups).sort((a,b)=>a.localeCompare(b,'id'));const label=document.getElementById('popCountLabel');if(label)label.textContent=names.length+' lokasi';
+ if(!names.length){body.innerHTML='<tr><td colspan="7" class="text-center text-muted">Belum ada data POP.</td></tr>';return;}
+ body.innerHTML=names.map(n=>{const d=groups[n],up=d.filter(r=>opsStatus(r['Status NMS'])==='up').length,down=d.filter(r=>opsStatus(r['Status NMS'])==='down').length,ont=d.reduce((s,r)=>s+opsNumber(r['Jumlah ont regist']),0),isp=[...new Set(d.map(r=>r['Nama ISP']).filter(Boolean))].join(', ')||'-',ips=d.map(r=>r['IP']).filter(Boolean).join(', ')||'-';return '<tr><td class="fw-semibold">'+opsText(n)+'</td><td>'+opsText(isp)+'</td><td>'+d.length+'</td><td><span class="ops-status-up">'+up+'</span></td><td><span class="ops-status-down">'+down+'</span></td><td>'+ont.toLocaleString('id-ID')+'</td><td class="ops-ip-list">'+opsText(ips)+'</td></tr>';}).join('');
+}
+function renderAnalyticsCharts(groups){
+ if(typeof Chart==='undefined')return;const pc=document.getElementById('chartAnalyticsPop'),bc=document.getElementById('chartAnalyticsBrand');const pn=Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length).slice(0,12),pv=pn.map(n=>groups[n].length),brands=opsGroups(globalData,'Brand OLT'),bn=Object.keys(brands).sort((a,b)=>brands[b].length-brands[a].length),bv=bn.map(n=>brands[n].length),tc=document.documentElement.dataset.theme==='light'?'#52657a':'#a9bed1';
+ if(analyticsPopChart)analyticsPopChart.destroy();if(analyticsBrandChart)analyticsBrandChart.destroy();
+ if(pc)analyticsPopChart=new Chart(pc,{type:'bar',data:{labels:pn,datasets:[{label:'Jumlah perangkat',data:pv,backgroundColor:'#27bfd0',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{precision:0,color:tc},grid:{color:'rgba(140,160,180,.12)'}},y:{ticks:{color:tc},grid:{display:false}}}}});
+ if(bc)analyticsBrandChart=new Chart(bc,{type:'doughnut',data:{labels:bn,datasets:[{data:bv,backgroundColor:['#28c5d5','#83d65a','#638cf5','#f2b84b','#a77cf4','#ef7c86','#5eabb4'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:tc,padding:14,usePointStyle:true}}}}});
+}
 // Render ToDo List
 if (typeof renderTodos === "function") {
     renderTodos();
