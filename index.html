@@ -583,12 +583,12 @@ ul li a:hover {
     <button class="sidebar-collapse" type="button" data-sidebar-toggle aria-label="Collapse sidebar" title="Collapse sidebar"><i class="bi bi-layout-sidebar-inset"></i></button>
     <div class="sidebar-caption">WORKSPACE</div>
     <nav class="sidebar-nav" aria-label="Navigasi utama">
-      <a class="sidebar-link active" href="#page-overview" data-nav="overview"><i class="bi bi-grid-1x2"></i><span>Overview</span></a>
-      <a class="sidebar-link" href="#network-monitoring" data-nav="monitoring"><i class="bi bi-activity"></i><span>Monitoring</span></a>
-      <a class="sidebar-link" href="#network-inventory" data-nav="inventory"><i class="bi bi-hdd-network"></i><span>Network Inventory</span></a>
-      <a class="sidebar-link" href="#pop-management" data-nav="pop"><i class="bi bi-diagram-3"></i><span>POP Management</span></a>
-      <a class="sidebar-link" href="#analytics" data-nav="analytics"><i class="bi bi-bar-chart-line"></i><span>Analytics</span></a>
-      <a class="sidebar-link" href="#field-operations" data-nav="operations"><i class="bi bi-clipboard-check"></i><span>Field Operations</span></a>
+      <a class="sidebar-link active" href="/" data-nav="overview"><i class="bi bi-grid-1x2"></i><span>Overview</span></a>
+      <a class="sidebar-link" href="/monitoring/" data-nav="monitoring"><i class="bi bi-activity"></i><span>Monitoring</span></a>
+      <a class="sidebar-link" href="/inventory/" data-nav="inventory"><i class="bi bi-hdd-network"></i><span>Network Inventory</span></a>
+      <a class="sidebar-link" href="/pops/" data-nav="pop"><i class="bi bi-diagram-3"></i><span>POP Management</span></a>
+      <a class="sidebar-link" href="/analytics/" data-nav="analytics"><i class="bi bi-bar-chart-line"></i><span>Analytics</span></a>
+      <a class="sidebar-link" href="/operations/" data-nav="operations"><i class="bi bi-clipboard-check"></i><span>Field Operations</span></a>
       <a class="sidebar-link" href="/scriptgen/" data-nav="scriptgen"><i class="bi bi-terminal"></i><span>Script Generator</span><i class="bi bi-box-arrow-up-right nav-external"></i></a>
     </nav>
     <div class="sidebar-bottom"><span class="system-pulse"></span><span class="sidebar-status">Workspace active</span><span class="sidebar-version">v2.0</span></div>
@@ -613,15 +613,7 @@ ul li a:hover {
     </header>
     <main class="app-content" id="page-overview">
       <div class="page-intro"><div><div class="page-eyebrow">STARLITE / OVERVIEW</div><h1>Dashboard Overview</h1><p>Ringkasan infrastruktur dan aktivitas operasional jaringan.</p></div><span class="page-live"><i></i> Workspace</span></div>
-      <section id="network-monitoring" class="ops-module">
-<div class="module-heading"><div><div class="page-eyebrow">NETWORK / INVENTORY SNAPSHOT</div><h2>Monitoring Overview</h2><p>Status berdasarkan sinkronisasi database terakhir.</p></div><span class="module-stamp" id="monitoringUpdated">Menunggu data</span></div>
-<div class="row g-3 mb-4">
-<div class="col-6 col-xl"><div class="ops-kpi"><span>Total OLT</span><strong id="kpiTotalOlt">—</strong><small>Terdaftar</small></div></div>
-<div class="col-6 col-xl"><div class="ops-kpi"><span>UP / Online</span><strong class="kpi-good" id="kpiOnline">—</strong><small>Status NMS</small></div></div>
-<div class="col-6 col-xl"><div class="ops-kpi"><span>DOWN / Offline</span><strong class="kpi-bad" id="kpiOffline">—</strong><small>Status NMS</small></div></div>
-<div class="col-6 col-xl"><div class="ops-kpi"><span>Total POP</span><strong id="kpiPop">—</strong><small>Lokasi unik</small></div></div>
-<div class="col-6 col-xl"><div class="ops-kpi"><span>ONT Registered</span><strong id="kpiOnt">—</strong><small>Akumulasi data</small></div></div>
-</div></section>
+      
 <!-- Area Chart & To Do List -->
 
         <div class="row mb-4 align-items-stretch">
@@ -682,7 +674,7 @@ ul li a:hover {
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
 
-                        <h6 class="m-0 fw-bold" id="field-operations">📝 To Do List Lapangan</h6>
+                        <h6 class="m-0 fw-bold" id="todo-heading">📝 To Do List Lapangan</h6>
 
                         <span class="badge bg-primary rounded-pill" id="todoCount">0</span>
 
@@ -713,329 +705,12 @@ ul li a:hover {
 
 
 
-        <section id="network-inventory" class="ops-module"><div class="module-heading"><div><div class="page-eyebrow">ASSET / DEVICE REGISTER</div><h2>Network Inventory</h2><p>Daftar perangkat dan stasiun dalam database operasional.</p></div></div>
-<!-- Area Tabel Database -->
-
-        <div class="card p-4">
-
-            <div class="d-flex justify-content-between align-items-center mb-3">
-
-                <h5 class="m-0">Data Perangkat & Stasiun</h5>
-
-                <div>
-
-                    <button id="btn-sync" class="btn btn-info btn-sm text-white me-2">🔄 Sinkron Database</button>
-
-                    <button class="btn btn-success btn-sm" onclick="showForm()">+ Tambah Data</button>
-
-                </div>
-
-            </div>
+        
 
 
-
-            <!-- Kolom Pencarian -->
-
-            <div class="mb-3"><div class="row g-2"><div class="col-lg-6"><input type="text" id="searchInput" class="form-control" placeholder="Cari IP, ISP, POP, hostname, atau lainnya..."></div><div class="col-lg-3"><select id="inventoryPopFilter" class="form-select"><option value="">Semua POP</option></select></div><div class="col-lg-3"><select id="inventoryStatusFilter" class="form-select"><option value="">Semua Status NMS</option><option value="up">UP / Online</option><option value="down">DOWN / Offline</option><option value="other">Lainnya / Unknown</option></select></div></div></div>
-
-
-
-            <div class="table-responsive">
-
-                <table class="table table-hover table-bordered text-center align-middle" id="dataTable">
-
-                    <thead class="table-dark">
-
-                        <tr>
-
-                            <th>Nama ISP</th>
-
-                            <th>POP</th>
-
-                            <th>Brand OLT</th>
-
-                            <th>IP</th>
-
-                            <th>Status NMS</th>
-
-                            <th>Traffic</th>
-
-                            <th style="min-width: 180px;">Aksi</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="tableBody">
-
-                        <tr>
-
-                            <td colspan="7">Memuat data dari Google Sheets...</td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-</section>
-<section id="pop-management" class="ops-module">
-<div class="module-heading"><div><div class="page-eyebrow">INFRASTRUCTURE / LOCATIONS</div><h2>POP Management</h2><p>Rekap perangkat berdasarkan lokasi POP dari database.</p></div><span class="module-stamp" id="popCountLabel">0 lokasi</span></div>
-<div class="table-responsive ops-table-wrap"><table class="table align-middle" id="popTable"><thead><tr><th>POP</th><th>ISP</th><th>OLT</th><th>UP</th><th>DOWN</th><th>ONT</th><th>IP Perangkat</th></tr></thead><tbody id="popTableBody"><tr><td colspan="7" class="text-center text-muted">Memuat data...</td></tr></tbody></table></div>
-</section>
-<section id="analytics" class="ops-module">
-<div class="module-heading"><div><div class="page-eyebrow">REPORTING / DISTRIBUTION</div><h2>Network Analytics</h2><p>Komposisi perangkat berdasarkan POP dan brand OLT.</p></div></div>
-<div class="row g-3"><div class="col-lg-6"><div class="ops-chart-card"><h3>Perangkat per POP</h3><div class="ops-chart-area"><canvas id="chartAnalyticsPop"></canvas></div></div></div><div class="col-lg-6"><div class="ops-chart-card"><h3>Distribusi Brand OLT</h3><div class="ops-chart-area"><canvas id="chartAnalyticsBrand"></canvas></div></div></div></div>
-<p class="ops-data-note"><i class="bi bi-info-circle"></i> Data dihitung dari Google Sheets, bukan polling SNMP atau telemetry real-time.</p>
-</section>
 </main>
   </div>
-<!-- Modal Detail Perangkat -->
-
-    <div class="modal fade" id="detailModal" tabindex="-1">
-
-        <div class="modal-dialog modal-lg">
-
-            <div class="modal-content">
-
-                <div class="modal-header">
-
-                    <h5 class="modal-title" id="modalTitle">Detail Perangkat</h5>
-
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-
-                </div>
-
-                <div class="modal-body" id="modalBody">
-
-                    <!-- Konten detail digenerate via JS -->
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- Modal Form Tambah/Edit Data -->
-
-    <div class="modal fade" id="formModal" tabindex="-1">
-
-        <div class="modal-dialog modal-lg">
-
-            <div class="modal-content">
-
-                <form id="dataForm">
-
-                    <div class="modal-header bg-primary text-white">
-
-                        <h5 class="modal-title" id="formModalTitle">Tambah Data Baru</h5>
-
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-
-                    </div>
-
-                    <div class="modal-body">
-
-                        <input type="hidden" id="formAction" value="insert">
-
-                        <input type="hidden" id="formRowIndex" value="">
-
-
-
-                        <div class="row g-3">
-
-                            <div class="col-md-6">
-
-                                <label class="form-label">Nama ISP</label>
-
-                                <input type="text" class="form-control form-control-sm" id="f_nama_isp" required>
-
-                            </div>
-
-                            <div class="col-md-6">
-
-                                <label class="form-label">POP</label>
-
-                                <input type="text" class="form-control form-control-sm" id="f_pop">
-
-                            </div>
-
-                            <div class="col-md-6">
-
-                                <label class="form-label">Brand OLT</label>
-
-                                <input type="text" class="form-control form-control-sm" id="f_brand_olt">
-
-                            </div>
-
-                            <div class="col-md-6">
-
-                                <label class="form-label">Tipe OLT</label>
-
-                                <input type="text" class="form-control form-control-sm" id="f_tipe_olt">
-
-                            </div>
-
-                            <div class="col-md-6">
-
-                                <label class="form-label">Hostname</label>
-
-                                <input type="text" class="form-control form-control-sm" id="f_hostname">
-
-                            </div>
-
-                            <div class="col-md-6">
-
-                                <label class="form-label">IP Management</label>
-
-                                <input type="text" class="form-control form-control-sm" id="f_ip">
-
-                            </div>
-
-                            <div class="col-md-6">
-
-                                <label class="form-label">Nama Stasiun</label>
-
-                                <input type="text" class="form-control form-control-sm" id="f_nama_stasiun">
-
-                            </div>
-
-                            <div class="col-md-6">
-
-                                <label class="form-label">Kode Stasiun</label>
-
-                                <input type="text" class="form-control form-control-sm" id="f_kode_stasiun">
-
-                            </div>
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">Status NMS</label>
-
-                                <select class="form-select form-select-sm" id="f_status_nms">
-
-                                    <option value="Up">Up</option>
-
-                                    <option value="Done">Done</option>
-
-                                    <option value="Down">Down</option>
-
-                                    <option value="NY">NY</option>
-
-                                </select>
-
-                            </div>
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">Billing</label>
-
-                                <select class="form-select form-select-sm" id="f_billing">
-
-                                    <option value="Done">Done</option>
-
-                                    <option value="NY">NY</option>
-
-                                </select>
-
-                            </div>
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">Traffic</label>
-
-                                <select class="form-select form-select-sm" id="f_traffic">
-
-                                    <option value="Migrasi">Migrasi</option>
-
-                                    <option value="Belum">Belum</option>
-
-                                </select>
-
-                            </div>
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">Jumlah Card</label>
-
-                                <input type="number" class="form-control form-control-sm" id="f_jumlah_card">
-
-                            </div>
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">Jumlah ONT</label>
-
-                                <input type="number" class="form-control form-control-sm" id="f_jumlah_ont">
-
-                            </div>
-
-                            <div class="col-md-4">
-
-                                <label class="form-label">Koordinat</label>
-
-                                <input type="text" class="form-control form-control-sm" id="f_koordinat"
-
-                                    placeholder="-6.2000, 106.8166">
-
-                            </div>
-
-                            <div class="col-12">
-
-                                <label class="form-label">Alamat Lengkap</label>
-
-                                <textarea class="form-control form-control-sm" id="f_alamat" rows="2"></textarea>
-
-                            </div>
-
-                            <div class="col-md-6">
-
-                                <label class="form-label">Remarks</label>
-
-                                <input type="text" class="form-control form-control-sm" id="f_remarks">
-
-                            </div>
-
-                            <div class="col-md-6">
-
-                                <label class="form-label">Link Foto Perangkat</label>
-
-                                <input type="url" class="form-control form-control-sm" id="f_link_foto"
-
-                                    placeholder="https://...">
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="modal-footer">
-
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-
-                        <button type="submit" class="btn btn-primary" id="btnSubmitForm">Simpan Data</button>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="app.js"></script>
     <script src="/js/app-shell.js"></script>
