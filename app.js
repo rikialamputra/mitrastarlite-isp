@@ -69,7 +69,8 @@ if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
     }
 }
 
-document.getElementById('btn-logout').addEventListener('click', () => firebase.auth().signOut());
+const logoutButton = document.getElementById('btn-logout');
+if (logoutButton) logoutButton.addEventListener('click', () => firebase.auth().signOut());
 
 firebase.auth().onAuthStateChanged((user) => {
     if (user && user.email.endsWith("@weave.co.id")) {
