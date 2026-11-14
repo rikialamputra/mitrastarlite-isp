@@ -1,0 +1,51 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Network Analytics | Mitra ISP Starlite</title><link rel="icon" href="/assets/starlite-mark.svg"><link rel="stylesheet" href="/css/app-shell.css"><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><style>body{background:#08111f;color:#e8f2ff}#dashboard{display:none}.card{border:1px solid rgba(148,180,210,.16);border-radius:16px;background:#101d2e;color:#e8f2ff}.form-control,.form-select{background:#0a1727;color:#e7f2ff;border-color:#29415a}.table{--bs-table-bg:transparent;--bs-table-color:#dceafa;--bs-table-border-color:rgba(148,180,210,.13)}.table thead th{color:#9deaf0;background:#0b1b2c}.ops-module{margin:8px 0 34px}.module-heading{display:flex;justify-content:space-between;gap:18px;margin:8px 0 18px}.module-heading h2{font-size:21px;font-weight:800}.ops-kpi,.ops-table-wrap,.ops-chart-card{padding:17px;border:1px solid var(--st-line);border-radius:14px;background:var(--st-panel)}.ops-kpi span,.ops-kpi small{display:block;color:var(--st-muted);font-size:10px}.ops-kpi strong{display:block;margin:10px 0;color:var(--st-text);font-size:27px}.ops-chart-area{height:270px;position:relative}.ops-status-up{color:#36b77b}.ops-status-down{color:#ed7078}.ops-ip-list{max-width:220px;overflow-wrap:anywhere}</style></head><body><!-- Halaman Login dengan Input Email (Passwordless) -->
+
+    <div id="login-page" class="container mt-5" style="max-width: 400px;">
+
+        <div class="text-center">
+
+            <img src="/assets/starlite-mark.svg" alt="Starlite" class="mb-3 starlite-login-mark">
+
+            <h2>Mitra ISP Starlite</h2>
+
+            <p class="text-muted">Gunakan email @weave.co.id untuk masuk</p>
+
+        </div>
+
+
+
+        <div class="card p-4 mt-3">
+
+            <form id="login-form">
+
+                <div class="mb-3">
+
+                    <label for="emailInput" class="form-label">Email Akses</label>
+
+                    <input type="email" class="form-control" id="emailInput" placeholder="nama@weave.co.id" required>
+
+                </div>
+
+                <button type="submit" id="btn-login" class="btn btn-primary w-100">Kirim Link Login</button>
+
+            </form>
+
+            <div id="login-message" class="mt-3 text-center" style="display: none;"></div>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="dashboard" class="starlite-app" data-page="analytics"><aside class="app-sidebar" id="appSidebar"><a class="sidebar-brand" href="/"><img src="/assets/starlite-mark.svg" alt=""><span class="brand-copy"><strong>STARLITE</strong><small>MITRA ISP · NOC</small></span></a><button class="sidebar-collapse" type="button" data-sidebar-toggle aria-label="Collapse sidebar"><i class="bi bi-layout-sidebar-inset"></i></button><div class="sidebar-caption">WORKSPACE</div><nav class="sidebar-nav" aria-label="Navigasi utama"><a class="sidebar-link " href="/" data-nav="overview" ><i class="bi bi-grid-1x2"></i><span>Overview</span></a>
+<a class="sidebar-link " href="/monitoring/" data-nav="monitoring" ><i class="bi bi-activity"></i><span>Monitoring</span></a>
+<a class="sidebar-link " href="/inventory/" data-nav="inventory" ><i class="bi bi-hdd-network"></i><span>Network Inventory</span></a>
+<a class="sidebar-link " href="/pops/" data-nav="pop" ><i class="bi bi-diagram-3"></i><span>POP Management</span></a>
+<a class="sidebar-link active" href="/analytics/" data-nav="analytics" aria-current="page"><i class="bi bi-bar-chart-line"></i><span>Analytics</span></a>
+<a class="sidebar-link " href="/operations/" data-nav="operations" ><i class="bi bi-clipboard-check"></i><span>Field Operations</span></a>
+<a class="sidebar-link " href="/scriptgen/" data-nav="scriptgen" ><i class="bi bi-terminal"></i><span>Script Generator</span></a></nav><div class="sidebar-bottom"><span class="system-pulse"></span><span class="sidebar-status">Workspace active</span><span class="sidebar-version">v2.0</span></div></aside><div class="sidebar-backdrop" data-sidebar-close></div><div class="app-main"><header class="app-topbar"><div class="topbar-leading"><button class="mobile-menu-toggle" type="button" data-mobile-menu aria-label="Open navigation"><i class="bi bi-list"></i></button><div><div class="topbar-kicker">NETWORK OPERATIONS CENTER</div><div class="topbar-title" id="topbarPageTitle">Network Analytics</div></div></div><div class="topbar-actions"><span class="topbar-date-label">Operations workspace</span><div class="theme-control" role="group" aria-label="Theme preference"><button type="button" data-theme-choice="system" title="System"><i class="bi bi-display"></i></button><button type="button" data-theme-choice="light" title="Light"><i class="bi bi-sun"></i></button><button type="button" data-theme-choice="dark" title="Dark"><i class="bi bi-moon-stars"></i></button></div><div class="topbar-user"><span id="user-email" class="user-email"></span></div><button id="btn-logout" class="btn btn-sm btn-outline-danger topbar-logout"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button></div></header><main class="app-content"><div class="page-intro"><div><div class="page-eyebrow">STARLITE / NETWORK ANALYTICS</div><h1>Network Analytics</h1><p>Distribusi perangkat berdasarkan POP dan brand OLT.</p></div><span class="page-live"><i></i> Workspace</span></div><section id="analytics" class="ops-module">
+<div class="module-heading"><div><div class="page-eyebrow">REPORTING / DISTRIBUTION</div><h2>Network Analytics</h2><p>Komposisi perangkat berdasarkan POP dan brand OLT.</p></div></div>
+<div class="row g-3"><div class="col-lg-6"><div class="ops-chart-card"><h3>Perangkat per POP</h3><div class="ops-chart-area"><canvas id="chartAnalyticsPop"></canvas></div></div></div><div class="col-lg-6"><div class="ops-chart-card"><h3>Distribusi Brand OLT</h3><div class="ops-chart-area"><canvas id="chartAnalyticsBrand"></canvas></div></div></div></div>
+<p class="ops-data-note"><i class="bi bi-info-circle"></i> Data dihitung dari Google Sheets, bukan polling SNMP atau telemetry real-time.</p>
+</section></main></div></div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script><script src="/app.js"></script><script src="/js/app-shell.js"></script></body></html>
