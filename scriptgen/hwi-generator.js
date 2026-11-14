@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setNotice("Lengkapi hostname, slot tujuan, VLAN stasiun, dan pilih file CSV.");
       return;
     }
-    if (!/^\\d+$/.test(slotTujuan) || !/^\\d+$/.test(vlanStasiun) || Number(vlanStasiun)<1 || Number(vlanStasiun)>4094) {
+    if (!/^\d+$/.test(slotTujuan) || !/^\d+$/.test(vlanStasiun) || Number(vlanStasiun)<1 || Number(vlanStasiun)>4094) {
       setNotice("Slot harus berupa angka dan VLAN harus berada pada rentang 1–4094.");
       return;
     }
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function processAndPreviewCSV(csvText, hostname, slotTujuan, vlanStasiun) {
   parsedData = [];
   globalConfig = { hostname, slotTujuan, vlanStasiun };
-  const lines = csvText.replace(/\\x00/g, "").replace(/\\r/g, "").split("\\n");
+  const lines = csvText.replace(/\x00/g, "").replace(/\r/g, "").split("\n");
   let headerLineIdx = -1;
   let headers = [];
   for (let i=0;i<lines.length;i++) {
