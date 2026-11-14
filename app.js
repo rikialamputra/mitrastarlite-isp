@@ -190,15 +190,18 @@ function renderCharts() {
     if (chartNMSInstance) chartNMSInstance.destroy();
     if (chartBillingInstance) chartBillingInstance.destroy();
 
-    chartISPInstance = new Chart(document.getElementById('chartISP'), {
+    const ispCanvas = document.getElementById('chartISP');
+    const nmsCanvas = document.getElementById('chartNMS');
+    const billingCanvas = document.getElementById('chartBilling');
+    if (ispCanvas) chartISPInstance = new Chart(ispCanvas, {
         type: 'doughnut',
         data: { labels: Object.keys(ispCount), datasets: [{ data: Object.values(ispCount), backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0'] }] }
     });
-    chartNMSInstance = new Chart(document.getElementById('chartNMS'), {
+    if (nmsCanvas) chartNMSInstance = new Chart(nmsCanvas, {
         type: 'pie',
         data: { labels: Object.keys(nmsCount), datasets: [{ data: Object.values(nmsCount), backgroundColor: ['#198754', '#dc3545'] }] }
     });
-    chartBillingInstance = new Chart(document.getElementById('chartBilling'), {
+    if (billingCanvas) chartBillingInstance = new Chart(billingCanvas, {
         type: 'bar',
         data: { labels: Object.keys(billingCount), datasets: [{ label: 'Jumlah', data: Object.values(billingCount), backgroundColor: '#0d6efd' }] },
         options: { scales: { y: { beginAtZero: true } } }
