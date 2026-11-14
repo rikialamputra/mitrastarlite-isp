@@ -691,45 +691,6 @@ ul li a:hover {
 
 
 
-        <!-- OLT Script Generator: struktur dan ID dipertahankan agar cocok dengan app.js -->
-        <div id="olt-script-generator" class="generator-container">
-            <div class="generator-header">
-                <div>
-                    <h3>OLT Script Generator</h3>
-                    <p class="generator-description">Upload CSV Huawei OLT, periksa ringkasan data ONU, lalu generate dan download script konfigurasi.</p>
-                </div>
-                <span class="badge bg-primary">CSV · OLT</span>
-            </div>
-
-            <form id="generatorForm" class="generator-form">
-                <div class="form-group">
-                    <label for="hostname">1. Hostname (Nama File Output):</label>
-                    <input type="text" id="hostname" required placeholder="Contoh: OLT-KOTA-A">
-                </div>
-                <div class="form-group">
-                    <label for="slotTujuan">2. Card Tujuan (Slot):</label>
-                    <input type="text" id="slotTujuan" required placeholder="Contoh: 1">
-                </div>
-                <div class="form-group">
-                    <label for="vlanStasiun">3. VLAN Stasiun:</label>
-                    <input type="text" id="vlanStasiun" required placeholder="Contoh: 100">
-                </div>
-                <div class="form-group">
-                    <label for="csvFile">4. Upload File CSV (Export Huawei OLT):</label>
-                    <input type="file" id="csvFile" accept=".csv" required>
-                    <small class="form-text">Pastikan file CSV berasal dari export Huawei OLT dan memiliki kolom Port, ONU ID, serta SN.</small>
-                </div>
-
-                <button type="button" id="previewBtn" class="btn-primary">Hitung &amp; Preview Data</button>
-            </form>
-
-            <div id="summaryBox" class="summary-box" style="display: none; margin-top: 20px;">
-                <h4>Ringkasan Data ONU:</h4>
-                <p id="summaryText"></p>
-                <button type="button" id="generateBtn" class="btn-success">Generate &amp; Download Script</button>
-            </div>
-        </div>
-
         <!-- Area Tabel Database -->
 
         <div class="card p-4">
