@@ -221,3 +221,37 @@ html[data-theme="light"] .scriptgen-app .secondary-button{background:#f3f7fb!imp
 html[data-theme="light"] .scriptgen-app .secondary-button:hover:not(:disabled){background:#e3f2f6!important;color:#123044!important;border-color:#087e9b!important}
 html[data-theme="light"] .scriptgen-app .csv-status{color:#344b61!important}
 html[data-theme="light"] .scriptgen-app .metric-card strong{color:#17263a!important}
+
+
+/* Sticky table headers for long POP and inventory lists */
+#dashboard #popTable,
+#dashboard #dataTable{border-collapse:separate;border-spacing:0}
+#dashboard #popTable thead th,
+#dashboard #dataTable thead th{
+  position:sticky;
+  top:76px;
+  z-index:1010;
+  background:#0b1b2c!important;
+  color:#9deaf0!important;
+  box-shadow:0 1px 0 rgba(148,180,210,.28);
+}
+#dashboard #popTable thead,
+#dashboard #dataTable thead{position:relative;z-index:1010}
+/* Allow page-level sticky positioning instead of trapping it inside a table wrapper */
+#dashboard #network-inventory .table-responsive,
+#dashboard #pop-management .table-responsive{
+  overflow-x:visible;
+  overflow-y:visible;
+}
+html[data-theme="light"] #dashboard #popTable thead th,
+html[data-theme="light"] #dashboard #dataTable thead th{
+  background:#edf3f8!important;
+  color:#34536c!important;
+  box-shadow:0 1px 0 #d5e0eb;
+}
+@media(max-width:900px){
+  #dashboard #network-inventory .table-responsive,
+  #dashboard #pop-management .table-responsive{overflow-x:auto;overflow-y:visible}
+  #dashboard #popTable thead th,
+  #dashboard #dataTable thead th{top:66px}
+}
