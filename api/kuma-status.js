@@ -74,7 +74,7 @@ export default async function handler(req, res) {
       return {
         id: m.id,
         name: m.name || "",
-        hostname: m.hostname || m.name || "",
+        hostname: m.name || "",
         ip: m.hostname || "",
         parent: m.parent ?? null,
         status: ({ 1: "UP", 0: "DOWN", 2: "PENDING", 3: "MAINTENANCE" })[code] || "UNKNOWN",
