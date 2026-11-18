@@ -94,6 +94,7 @@ async function fetchData() {
         renderTable();
         renderCharts();
         renderOperationalModules();
+        if (document.getElementById('kuma-monitoring')) loadKumaStatus();
     } catch (error) {
         console.error("Error fetching data: ", error);
         const tableBody = document.getElementById('tableBody');
@@ -592,6 +593,101 @@ function downloadTextFile(content, filename) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
+
+// --- UPTIME KUMA LIVE STATUS ---
+let kumaMonitors = [];
+let kumaRequestInProgress = false;
+
+function kumaEscape(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function kumaStatusBadge(status) {
+    const s = String(status || 'UNKNOWN').toUpperCase();
+    const cls = s === 'UP' ? 'success' : s === 'DOWN' ? 'danger' : s === 'PENDING' ? 'warning text-dark' : 'secondary';
+    return '<span class="badge bg-' + cls + '">' + kumaEscape(s) + '</span>';
+}
+
+function renderKumaTable() {
+    const body = document.getElementById('kumaTableBody');
+    if (!body) return;
+    const q = (document.getElementById('kumaSearch')?.value || '').trim().toLowerCase();
+    const statusFilter = document.getElementById('kumaStatusFilter')?.value || '';
+    const filtered = kumaMonitors.filter(m => {
+        const fields = [m.hostname, m.ip, m.isp, m.pop, m.message].join(' ').toLowerCase();
+        return (!q || fields.includes(q)) && (!statusFilter || m.status === statusFilter);
+    });
+    const count = document.getElementById('kumaResultCount');
+    if (count) count.textContent = filtered.length + ' / ' + kumaMonitors.length + ' monitor';
+    if (!filtered.length) {
+        body.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Tidak ada monitor yang cocok.</td></tr>';
+        return;
+    }
+    body.innerHTML = filtered.map(m => {
+        const ping = m.ping_ms == null ? '—' : Number(m.ping_ms).toFixed(1) + ' ms';
+        const time = m.last_check ? kumaEscape(m.last_check) : '—';
+        const message = m.message ? kumaEscape(m.message).replace(/\n/g, ' ').slice(0, 180) : '—';
+        return '<tr><td>' + kumaEscape(m.isp || '—') + '</td><td>' + kumaEscape(m.pop || '—') +
+            '</td><td class="fw-semibold">' + kumaEscape(m.hostname) + '</td><td><code>' + kumaEscape(m.ip) +
+            '</code></td><td>' + kumaStatusBadge(m.status) + '</td><td>' + ping +
+            '</td><td class="text-nowrap">' + time + '</td><td class="small" style="max-width:260px;overflow-wrap:anywhere">' + message + '</td></tr>';
+    }).join('');
+}
+
+async function loadKumaStatus() {
+    const body = document.getElementById('kumaTableBody');
+    if (!body || kumaRequestInProgress) return;
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+    kumaRequestInProgress = true;
+    const refresh = document.getElementById('btnKumaRefresh');
+    const errorBox = document.getElementById('kumaError');
+    if (refresh) refresh.disabled = true;
+    if (errorBox) { errorBox.hidden = true; errorBox.textContent = ''; }
+    try {
+        const idToken = await user.getIdToken();
+        const response = await fetch('/api/kuma-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Gagal mengambil status Uptime Kuma');
+        const inventoryByHostname = new Map((globalData || []).map(row => [
+            String(row['Hostname'] || '').trim().toLowerCase(), row
+        ]));
+        kumaMonitors = (data.monitors || []).map(m => {
+            const row = inventoryByHostname.get(String(m.hostname || '').trim().toLowerCase()) || {};
+            return {
+                ...m,
+                isp: row['Nama ISP'] || '',
+                pop: row['POP'] || ''
+            };
+        });
+        const summary = data.summary || {};
+        const put = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value ?? 0; };
+        put('kumaTotal', data.count ?? kumaMonitors.length);
+        put('kumaUp', summary.UP || 0);
+        put('kumaDown', summary.DOWN || 0);
+        put('kumaUnknown', summary.UNKNOWN || 0);
+        put('kumaLastUpdated', 'API · ' + new Date(data.checked_at || Date.now()).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }));
+        renderKumaTable();
+    } catch (error) {
+        console.error('Uptime Kuma status:', error);
+        if (errorBox) {
+            errorBox.textContent = 'Gagal memuat status Kuma: ' + error.message + '. Periksa environment variable Vercel dan koneksi API Bridge.';
+            errorBox.hidden = false;
+        }
+        body.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Status Uptime Kuma tidak tersedia.</td></tr>';
+    } finally {
+        kumaRequestInProgress = false;
+        if (refresh) refresh.disabled = false;
+    }
+}
+
+document.getElementById('btnKumaRefresh')?.addEventListener('click', loadKumaStatus);
+document.getElementById('kumaSearch')?.addEventListener('input', renderKumaTable);
+document.getElementById('kumaStatusFilter')?.addEventListener('change', renderKumaTable);
 
 // --- 13. OPERATIONAL MODULES: MONITORING, POP & ANALYTICS ---
 let analyticsPopChart=null, analyticsBrandChart=null, inventoryFiltersBound=false;
