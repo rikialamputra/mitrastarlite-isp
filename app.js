@@ -716,6 +716,51 @@ async function loadKumaStatus() {
 }
 
 document.getElementById('btnKumaRefresh')?.addEventListener('click', loadKumaStatus);
+
+// --- INVENTORY TO UPTIME KUMA SYNC ---
+let kumaSyncInProgress = false;
+async function syncKumaMonitors() {
+  const button = document.getElementById("btnKumaSync");
+  const resultBox = document.getElementById("kumaSyncResult");
+  const errorBox = document.getElementById("kumaError");
+  const user = firebase.auth().currentUser;
+  if (!user || kumaSyncInProgress) return;
+  const devices = (globalData || []).map(row => ({
+    name: String(row["Hostname"] || "").trim(),
+    ip: String(row["IP"] || "").trim()
+  })).filter(d => d.name && d.ip);
+  if (!devices.length) {
+    if (resultBox) { resultBox.textContent = "Tidak ada perangkat dengan Hostname dan IP terisi."; resultBox.hidden = false; }
+    return;
+  }
+  if (!window.confirm(`Sinkronkan ${devices.length} perangkat OLT ke Uptime Kuma sebagai Ping (ICMP)? Monitor lama yang tidak ada di inventory tidak akan dihapus.`)) return;
+  kumaSyncInProgress = true;
+  if (button) { button.disabled = true; button.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menyinkronkan...'; }
+  if (resultBox) resultBox.hidden = true;
+  if (errorBox) errorBox.hidden = true;
+  try {
+    const idToken = await user.getIdToken();
+    const response = await fetch("/api/kuma-sync", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken, devices })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Sinkronisasi gagal");
+    if (resultBox) {
+      resultBox.textContent = `Selesai — ${data.added} ditambahkan, ${data.updated} diperbarui, ${data.unchanged} tidak berubah, ${data.conflicts} konflik, ${data.failed} gagal. Total eligible: ${data.eligible_count}.`;
+      resultBox.className = "alert " + (data.failed || data.conflicts ? "alert-warning" : "alert-success") + " py-2 small";
+      resultBox.hidden = false;
+    }
+    await loadKumaStatus();
+  } catch (error) {
+    if (resultBox) { resultBox.textContent = "Sinkronisasi gagal: " + error.message; resultBox.className = "alert alert-danger py-2 small"; resultBox.hidden = false; }
+  } finally {
+    kumaSyncInProgress = false;
+    if (button) { button.disabled = false; button.innerHTML = '<i class="bi bi-arrow-repeat"></i> Sinkronkan Monitor'; }
+  }
+}
+document.getElementById("btnKumaSync")?.addEventListener("click", syncKumaMonitors);
+
 document.getElementById('kumaSearch')?.addEventListener('input', renderKumaTable);
 document.getElementById('kumaStatusFilter')?.addEventListener('change', renderKumaTable);
 
