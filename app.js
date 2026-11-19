@@ -179,6 +179,36 @@ let chartISPInstance = null;
 let chartNMSInstance = null;
 let chartBillingInstance = null;
 
+const chartPalette = ['#22d3ee', '#34d399', '#818cf8', '#fbbf24', '#fb7185', '#a78bfa', '#38bdf8', '#2dd4bf'];
+function chartBaseOptions() {
+    const light = document.documentElement.dataset.theme === 'light';
+    const text = light ? '#52657a' : '#a9bed1';
+    const grid = light ? 'rgba(82,101,122,.12)' : 'rgba(148,180,210,.10)';
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 850, easing: 'easeOutQuart' },
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { color: text, padding: 18, usePointStyle: true, pointStyle: 'circle', boxWidth: 8, boxHeight: 8, font: { family: 'Inter, system-ui, sans-serif', size: 11, weight: '600' } }
+            },
+            tooltip: {
+                backgroundColor: light ? '#102033' : '#071522',
+                titleColor: '#eaf7ff',
+                bodyColor: '#c8dce9',
+                borderColor: 'rgba(34,211,238,.35)',
+                borderWidth: 1,
+                padding: 12,
+                cornerRadius: 10,
+                displayColors: true,
+                boxPadding: 5
+            }
+        }
+    };
+}
+
 function renderCharts() {
     let ispCount = {}, nmsCount = {}, billingCount = {};
     globalData.forEach(row => {
@@ -187,25 +217,25 @@ function renderCharts() {
         let bill = row['Billing'] || 'Unknown'; billingCount[bill] = (billingCount[bill] || 0) + 1;
     });
 
-    if (chartISPInstance) chartISPInstance.destroy();
-    if (chartNMSInstance) chartNMSInstance.destroy();
-    if (chartBillingInstance) chartBillingInstance.destroy();
-
+    [chartISPInstance, chartNMSInstance, chartBillingInstance].forEach(chart => chart?.destroy());
     const ispCanvas = document.getElementById('chartISP');
     const nmsCanvas = document.getElementById('chartNMS');
     const billingCanvas = document.getElementById('chartBilling');
+
     if (ispCanvas) chartISPInstance = new Chart(ispCanvas, {
         type: 'doughnut',
-        data: { labels: Object.keys(ispCount), datasets: [{ data: Object.values(ispCount), backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0'] }] }
+        data: { labels: Object.keys(ispCount), datasets: [{ data: Object.values(ispCount), backgroundColor: chartPalette, borderColor: '#101d2e', borderWidth: 4, hoverOffset: 9, borderRadius: 5 }] },
+        options: { ...chartBaseOptions(), cutout: '70%', plugins: { ...chartBaseOptions().plugins, legend: { ...chartBaseOptions().plugins.legend, position: 'right' } } }
     });
     if (nmsCanvas) chartNMSInstance = new Chart(nmsCanvas, {
-        type: 'pie',
-        data: { labels: Object.keys(nmsCount), datasets: [{ data: Object.values(nmsCount), backgroundColor: ['#198754', '#dc3545'] }] }
+        type: 'doughnut',
+        data: { labels: Object.keys(nmsCount), datasets: [{ data: Object.values(nmsCount), backgroundColor: ['#34d399', '#fb7185', '#fbbf24', '#94a3b8'], borderColor: '#101d2e', borderWidth: 4, hoverOffset: 9, borderRadius: 5 }] },
+        options: { ...chartBaseOptions(), cutout: '70%' }
     });
     if (billingCanvas) chartBillingInstance = new Chart(billingCanvas, {
         type: 'bar',
-        data: { labels: Object.keys(billingCount), datasets: [{ label: 'Jumlah', data: Object.values(billingCount), backgroundColor: '#0d6efd' }] },
-        options: { scales: { y: { beginAtZero: true } } }
+        data: { labels: Object.keys(billingCount), datasets: [{ label: 'Jumlah', data: Object.values(billingCount), backgroundColor: '#22d3ee', hoverBackgroundColor: '#67e8f9', borderRadius: 8, borderSkipped: false, maxBarThickness: 54 }] },
+        options: { ...chartBaseOptions(), plugins: { ...chartBaseOptions().plugins, legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: document.documentElement.dataset.theme === 'light' ? '#52657a' : '#a9bed1' } }, y: { beginAtZero: true, ticks: { precision: 0, color: document.documentElement.dataset.theme === 'light' ? '#52657a' : '#a9bed1' }, grid: { color: document.documentElement.dataset.theme === 'light' ? 'rgba(82,101,122,.12)' : 'rgba(148,180,210,.10)' } } } }
     });
 }
 
@@ -714,10 +744,14 @@ function renderPopTable(groups){
  body.innerHTML=names.map(n=>{const d=groups[n],up=d.filter(r=>opsStatus(r['Status NMS'])==='up').length,down=d.filter(r=>opsStatus(r['Status NMS'])==='down').length,ont=d.reduce((s,r)=>s+opsNumber(r['Jumlah ont regist']),0),isp=[...new Set(d.map(r=>r['Nama ISP']).filter(Boolean))].join(', ')||'-',ips=d.map(r=>r['IP']).filter(Boolean).join(', ')||'-';return '<tr><td class="fw-semibold">'+opsText(n)+'</td><td>'+opsText(isp)+'</td><td>'+d.length+'</td><td><span class="ops-status-up">'+up+'</span></td><td><span class="ops-status-down">'+down+'</span></td><td>'+ont.toLocaleString('id-ID')+'</td><td class="ops-ip-list">'+opsText(ips)+'</td></tr>';}).join('');
 }
 function renderAnalyticsCharts(groups){
- if(typeof Chart==='undefined')return;const pc=document.getElementById('chartAnalyticsPop'),bc=document.getElementById('chartAnalyticsBrand');const pn=Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length).slice(0,12),pv=pn.map(n=>groups[n].length),brands=opsGroups(globalData,'Brand OLT'),bn=Object.keys(brands).sort((a,b)=>brands[b].length-brands[a].length),bv=bn.map(n=>brands[n].length),tc=document.documentElement.dataset.theme==='light'?'#52657a':'#a9bed1';
+ if(typeof Chart==='undefined')return;
+ const pc=document.getElementById('chartAnalyticsPop'),bc=document.getElementById('chartAnalyticsBrand');
+ const pn=Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length).slice(0,12),pv=pn.map(n=>groups[n].length);
+ const brands=opsGroups(globalData,'Brand OLT'),bn=Object.keys(brands).sort((a,b)=>brands[b].length-brands[a].length),bv=bn.map(n=>brands[n].length);
+ const base=chartBaseOptions(),text=document.documentElement.dataset.theme==='light'?'#52657a':'#a9bed1';
  if(analyticsPopChart)analyticsPopChart.destroy();if(analyticsBrandChart)analyticsBrandChart.destroy();
- if(pc)analyticsPopChart=new Chart(pc,{type:'bar',data:{labels:pn,datasets:[{label:'Jumlah perangkat',data:pv,backgroundColor:'#27bfd0',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{precision:0,color:tc},grid:{color:'rgba(140,160,180,.12)'}},y:{ticks:{color:tc},grid:{display:false}}}}});
- if(bc)analyticsBrandChart=new Chart(bc,{type:'doughnut',data:{labels:bn,datasets:[{data:bv,backgroundColor:['#28c5d5','#83d65a','#638cf5','#f2b84b','#a77cf4','#ef7c86','#5eabb4'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:tc,padding:14,usePointStyle:true}}}}});
+ if(pc)analyticsPopChart=new Chart(pc,{type:'bar',data:{labels:pn,datasets:[{label:'Jumlah perangkat',data:pv,backgroundColor:'rgba(34,211,238,.82)',hoverBackgroundColor:'#67e8f9',borderRadius:8,borderSkipped:false,maxBarThickness:24}]},options:{...base,indexAxis:'y',plugins:{...base.plugins,legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{precision:0,color:text},grid:{color:'rgba(148,180,210,.10)'}},y:{ticks:{color:text},grid:{display:false}}}}});
+ if(bc)analyticsBrandChart=new Chart(bc,{type:'doughnut',data:{labels:bn,datasets:[{data:bv,backgroundColor:chartPalette,borderColor:document.documentElement.dataset.theme==='light'?'#fff':'#101d2e',borderWidth:4,hoverOffset:10,borderRadius:5}]},options:{...base,cutout:'72%',plugins:{...base.plugins,legend:{...base.plugins.legend,position:'bottom'}}}});
 }
 // Render ToDo List
 if (typeof renderTodos === "function") {
