@@ -56,9 +56,9 @@
 <section id="kuma-monitoring" class="ops-module">
   <div class="module-heading">
     <div><div class="page-eyebrow">LIVE / UPTIME KUMA</div><h2>Device Reachability</h2><p>Status berdasarkan heartbeat terakhir dari Uptime Kuma. Tidak menjalankan ping tambahan dari dashboard.</p></div>
-    <div class="d-flex align-items-center gap-2 flex-wrap"><span class="module-stamp" id="kumaLastUpdated">Menunggu API</span><button class="btn btn-sm btn-outline-info" id="btnKumaRefresh"><i class="bi bi-arrow-clockwise"></i> Refresh</button></div>
+    <div class="d-flex align-items-center gap-2 flex-wrap"><span class="module-stamp" id="kumaLastUpdated">Menunggu API</span><button class="btn btn-sm btn-outline-success" id="btnKumaSync"><i class="bi bi-arrow-repeat"></i> Sinkronkan Monitor</button><button class="btn btn-sm btn-outline-info" id="btnKumaRefresh"><i class="bi bi-arrow-clockwise"></i> Refresh</button></div>
   </div>
-  <div id="kumaError" class="alert alert-warning py-2 small" hidden></div>
+  <div id="kumaError" class="alert alert-warning py-2 small" hidden></div><div id="kumaSyncResult" class="alert alert-info py-2 small" hidden aria-live="polite"></div>
   <div class="row g-3 mb-3">
     <div class="col-6 col-xl-3"><div class="ops-kpi"><span>Total Monitor</span><strong id="kumaTotal">—</strong><small>Ping monitors</small></div></div>
     <div class="col-6 col-xl-3"><div class="ops-kpi"><span>UP</span><strong class="kpi-good" id="kumaUp">—</strong><small>Reachable</small></div></div>
