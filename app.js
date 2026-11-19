@@ -696,11 +696,20 @@ function renderKumaOverview(summary) {
     const statusCanvas = document.getElementById('kumaStatusChart');
     if (statusCanvas && typeof Chart !== 'undefined') {
         if (kumaStatusChart) kumaStatusChart.destroy();
-        const labels = Object.keys(statusCounts).filter(k => statusCounts[k] > 0);
+        const upByPop = new Map();
+        kumaMonitors.filter(m => m.status === 'UP').forEach(m => {
+            const pop = m.pop || 'POP belum terpetakan';
+            upByPop.set(pop, (upByPop.get(pop) || 0) + 1);
+        });
+        const upRows = [...upByPop.entries()].sort((a,b) => b[1] - a[1]).slice(0,15);
         kumaStatusChart = new Chart(statusCanvas, {
-            type: 'doughnut',
-            data: { labels, datasets: [{ data: labels.map(k => statusCounts[k]), backgroundColor: labels.map(k => ({UP:'#22b77a',DOWN:'#ef6673',PENDING:'#e9b949',UNKNOWN:'#8392a5',MAINTENANCE:'#4ea5d9'}[k])), borderColor:'#101d2e', borderWidth:3, hoverOffset:6 }] },
-            options: { responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{ position:'bottom', labels:{ color:'#a9bfd7', usePointStyle:true, padding:16 } } } }
+            type: 'bar',
+            data: { labels: upRows.map(x => x[0]), datasets: [{ label:'UP', data:upRows.map(x => x[1]), backgroundColor:'#22b77a', borderRadius:5, barThickness:18 }] },
+            options: {
+                indexAxis:'y', responsive:true, maintainAspectRatio:false,
+                scales:{ x:{ beginAtZero:true, ticks:{ color:'#a9bfd7', precision:0, stepSize:1 }, grid:{ color:'rgba(148,180,210,.12)' } }, y:{ ticks:{ color:'#a9bfd7' }, grid:{ display:false } } },
+                plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:ctx => ' UP: ' + ctx.parsed.x } } }
+            }
         });
     }
     const popMap = new Map();
