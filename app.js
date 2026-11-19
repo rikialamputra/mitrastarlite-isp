@@ -696,12 +696,12 @@ function renderKumaOverview(summary) {
     const statusCanvas = document.getElementById('kumaStatusChart');
     if (statusCanvas && typeof Chart !== 'undefined') {
         if (kumaStatusChart) kumaStatusChart.destroy();
-        const upByPop = new Map();
+        const upByIsp = new Map();
         kumaMonitors.filter(m => m.status === 'UP').forEach(m => {
-            const pop = m.pop || 'POP belum terpetakan';
-            upByPop.set(pop, (upByPop.get(pop) || 0) + 1);
+            const isp = m.isp || 'ISP belum terpetakan';
+            upByIsp.set(isp, (upByIsp.get(isp) || 0) + 1);
         });
-        const upRows = [...upByPop.entries()].sort((a,b) => b[1] - a[1]).slice(0,15);
+        const upRows = [...upByIsp.entries()].sort((a,b) => b[1] - a[1]).slice(0,15);
         kumaStatusChart = new Chart(statusCanvas, {
             type: 'bar',
             data: { labels: upRows.map(x => x[0]), datasets: [{ label:'UP', data:upRows.map(x => x[1]), backgroundColor:'#22b77a', borderRadius:5, barThickness:18 }] },
