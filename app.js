@@ -679,6 +679,11 @@ function renderKumaOverview(summary) {
         if (row) monitoredKeys.add(String(row['Hostname']).trim().toLowerCase() + '|' + String(row['IP']).trim().toLowerCase());
     });
     put('kpiMonitored', monitoredKeys.size);
+    const coverage = rows.length ? Math.min(100, monitoredKeys.size / rows.length * 100) : 0;
+    const coverageLabel = coverage.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+    const coverageEl = document.getElementById('kpiCoverage'); if (coverageEl) coverageEl.textContent = coverageLabel;
+    const coverageBar = document.getElementById('kpiCoverageBar'); if (coverageBar) coverageBar.style.width = coverage + '%';
+    const coverageDetail = document.getElementById('kpiCoverageDetail'); if (coverageDetail) coverageDetail.textContent = monitoredKeys.size.toLocaleString('id-ID') + ' dari ' + rows.length.toLocaleString('id-ID') + ' OLT inventory terpantau';
     put('kpiOnline', summary.UP || 0);
     put('kpiOffline', summary.DOWN || 0);
     const statusCounts = {
