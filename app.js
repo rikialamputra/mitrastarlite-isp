@@ -664,6 +664,63 @@ function renderKumaTable() {
     }).join('');
 }
 
+
+// Render overview health exclusively from the latest Uptime Kuma heartbeat response.
+function renderKumaOverview(summary) {
+    const rows = globalData || [];
+    const put = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = Number(value || 0).toLocaleString('id-ID'); };
+    const validInventory = rows.filter(r => String(r['Hostname'] || '').trim() && String(r['IP'] || '').trim());
+    const monitoredKeys = new Set();
+    kumaMonitors.forEach(m => {
+        const row = validInventory.find(r =>
+            String(r['Hostname'] || '').trim().toLowerCase() === String(m.hostname || '').trim().toLowerCase() ||
+            String(r['IP'] || '').trim().toLowerCase() === String(m.ip || '').trim().toLowerCase()
+        );
+        if (row) monitoredKeys.add(String(row['Hostname']).trim().toLowerCase() + '|' + String(row['IP']).trim().toLowerCase());
+    });
+    put('kpiMonitored', monitoredKeys.size);
+    put('kpiOnline', summary.UP || 0);
+    put('kpiOffline', summary.DOWN || 0);
+    const statusCounts = {
+        UP: summary.UP || 0, DOWN: summary.DOWN || 0,
+        PENDING: summary.PENDING || 0, UNKNOWN: summary.UNKNOWN || 0,
+        MAINTENANCE: summary.MAINTENANCE || 0
+    };
+    const statusCanvas = document.getElementById('kumaStatusChart');
+    if (statusCanvas && typeof Chart !== 'undefined') {
+        if (kumaStatusChart) kumaStatusChart.destroy();
+        const labels = Object.keys(statusCounts).filter(k => statusCounts[k] > 0);
+        kumaStatusChart = new Chart(statusCanvas, {
+            type: 'doughnut',
+            data: { labels, datasets: [{ data: labels.map(k => statusCounts[k]), backgroundColor: labels.map(k => ({UP:'#22b77a',DOWN:'#ef6673',PENDING:'#e9b949',UNKNOWN:'#8392a5',MAINTENANCE:'#4ea5d9'}[k])), borderColor:'#101d2e', borderWidth:3, hoverOffset:6 }] },
+            options: { responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{ position:'bottom', labels:{ color:'#a9bfd7', usePointStyle:true, padding:16 } } } }
+        });
+    }
+    const popMap = new Map();
+    kumaMonitors.forEach(m => {
+        const pop = m.pop || 'POP belum terpetakan';
+        if (!popMap.has(pop)) popMap.set(pop,{UP:0,DOWN:0,OTHER:0});
+        const item = popMap.get(pop);
+        if (m.status === 'UP') item.UP++;
+        else if (m.status === 'DOWN') item.DOWN++;
+        else item.OTHER++;
+    });
+    const popRows = [...popMap.entries()].sort((a,b)=>(b[1].DOWN-a[1].DOWN) || ((b[1].UP+b[1].DOWN)-(a[1].UP+a[1].DOWN))).slice(0,15);
+    const popCanvas = document.getElementById('kumaPopChart');
+    if (popCanvas && typeof Chart !== 'undefined') {
+        if (kumaPopChart) kumaPopChart.destroy();
+        kumaPopChart = new Chart(popCanvas, {
+            type:'bar',
+            data:{ labels:popRows.map(x=>x[0]), datasets:[
+                {label:'UP',data:popRows.map(x=>x[1].UP),backgroundColor:'#22b77a',borderRadius:4},
+                {label:'DOWN',data:popRows.map(x=>x[1].DOWN),backgroundColor:'#ef6673',borderRadius:4},
+                {label:'Other',data:popRows.map(x=>x[1].OTHER),backgroundColor:'#8392a5',borderRadius:4}
+            ]},
+            options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, scales:{x:{stacked:true,ticks:{color:'#a9bfd7',precision:0},grid:{color:'rgba(148,180,210,.12)'}},y:{stacked:true,ticks:{color:'#a9bfd7'},grid:{display:false}}}, plugins:{legend:{position:'bottom',labels:{color:'#a9bfd7',usePointStyle:true,padding:16}}}}
+        });
+    }
+}
+
 async function loadKumaStatus() {
     const body = document.getElementById('kumaTableBody');
     if (!body || kumaRequestInProgress) return;
@@ -683,16 +740,11 @@ async function loadKumaStatus() {
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Gagal mengambil status Uptime Kuma');
-        const inventoryByHostname = new Map((globalData || []).map(row => [
-            String(row['Hostname'] || '').trim().toLowerCase(), row
-        ]));
+        const inventoryByHostname = new Map((globalData || []).map(row => [String(row['Hostname'] || '').trim().toLowerCase(), row]));
+        const inventoryByIp = new Map((globalData || []).map(row => [String(row['IP'] || '').trim().toLowerCase(), row]));
         kumaMonitors = (data.monitors || []).map(m => {
-            const row = inventoryByHostname.get(String(m.hostname || '').trim().toLowerCase()) || {};
-            return {
-                ...m,
-                isp: row['Nama ISP'] || '',
-                pop: row['POP'] || ''
-            };
+            const row = inventoryByHostname.get(String(m.hostname || '').trim().toLowerCase()) || inventoryByIp.get(String(m.ip || '').trim().toLowerCase()) || {};
+            return { ...m, isp: row['Nama ISP'] || '', pop: row['POP'] || '' };
         });
         const summary = data.summary || {};
         const put = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value ?? 0; };
@@ -700,6 +752,7 @@ async function loadKumaStatus() {
         put('kumaUp', summary.UP || 0);
         put('kumaDown', summary.DOWN || 0);
         put('kumaUnknown', summary.UNKNOWN || 0);
+        renderKumaOverview(data.summary || {});
         put('kumaLastUpdated', 'API · ' + new Date(data.checked_at || Date.now()).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }));
         renderKumaTable();
     } catch (error) {
