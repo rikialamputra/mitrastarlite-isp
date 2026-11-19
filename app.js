@@ -712,25 +712,25 @@ function renderKumaOverview(summary) {
             }
         });
     }
-    const popMap = new Map();
+    const ispMap = new Map();
     kumaMonitors.forEach(m => {
-        const pop = m.pop || 'POP belum terpetakan';
-        if (!popMap.has(pop)) popMap.set(pop,{UP:0,DOWN:0,OTHER:0});
-        const item = popMap.get(pop);
+        const isp = m.isp || 'ISP belum terpetakan';
+        if (!ispMap.has(isp)) ispMap.set(isp,{UP:0,DOWN:0,OTHER:0});
+        const item = ispMap.get(isp);
         if (m.status === 'UP') item.UP++;
         else if (m.status === 'DOWN') item.DOWN++;
         else item.OTHER++;
     });
-    const popRows = [...popMap.entries()].sort((a,b)=>(b[1].DOWN-a[1].DOWN) || ((b[1].UP+b[1].DOWN)-(a[1].UP+a[1].DOWN))).slice(0,15);
-    const popCanvas = document.getElementById('kumaPopChart');
-    if (popCanvas && typeof Chart !== 'undefined') {
+    const ispRows = [...ispMap.entries()].sort((a,b)=>(b[1].DOWN-a[1].DOWN) || ((b[1].UP+b[1].DOWN)-(a[1].UP+a[1].DOWN))).slice(0,15);
+    const ispCanvas = document.getElementById('kumaPopChart');
+    if (ispCanvas && typeof Chart !== 'undefined') {
         if (kumaPopChart) kumaPopChart.destroy();
-        kumaPopChart = new Chart(popCanvas, {
+        kumaPopChart = new Chart(ispCanvas, {
             type:'bar',
-            data:{ labels:popRows.map(x=>x[0]), datasets:[
-                {label:'UP',data:popRows.map(x=>x[1].UP),backgroundColor:'#22b77a',borderRadius:4},
-                {label:'DOWN',data:popRows.map(x=>x[1].DOWN),backgroundColor:'#ef6673',borderRadius:4},
-                {label:'Other',data:popRows.map(x=>x[1].OTHER),backgroundColor:'#8392a5',borderRadius:4}
+            data:{ labels:ispRows.map(x=>x[0]), datasets:[
+                {label:'UP',data:ispRows.map(x=>x[1].UP),backgroundColor:'#22b77a',borderRadius:4},
+                {label:'DOWN',data:ispRows.map(x=>x[1].DOWN),backgroundColor:'#ef6673',borderRadius:4},
+                {label:'Other',data:ispRows.map(x=>x[1].OTHER),backgroundColor:'#8392a5',borderRadius:4}
             ]},
             options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, scales:{x:{stacked:true,ticks:{color:'#a9bfd7',precision:0},grid:{color:'rgba(148,180,210,.12)'}},y:{stacked:true,ticks:{color:'#a9bfd7'},grid:{display:false}}}, plugins:{legend:{position:'bottom',labels:{color:'#a9bfd7',usePointStyle:true,padding:16}}}}
         });
