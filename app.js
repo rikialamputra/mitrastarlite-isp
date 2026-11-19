@@ -627,6 +627,8 @@ function downloadTextFile(content, filename) {
 // --- UPTIME KUMA LIVE STATUS ---
 let kumaMonitors = [];
 let kumaRequestInProgress = false;
+let kumaStatusChart = null;
+let kumaPopChart = null;
 
 function kumaEscape(value) {
     return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
