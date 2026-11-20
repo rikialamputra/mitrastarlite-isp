@@ -94,7 +94,7 @@ async function fetchData() {
         renderTable();
         renderCharts();
         renderOperationalModules();
-        if (document.getElementById('kuma-monitoring')) loadKumaStatus();
+        if (document.getElementById('kuma-monitoring') || document.getElementById('popTableBody')) loadKumaStatus();
     } catch (error) {
         console.error("Error fetching data: ", error);
         const tableBody = document.getElementById('tableBody');
@@ -739,7 +739,7 @@ function renderKumaOverview(summary) {
 
 async function loadKumaStatus() {
     const body = document.getElementById('kumaTableBody');
-    if (!body || kumaRequestInProgress) return;
+    if (kumaRequestInProgress) return;
     const user = firebase.auth().currentUser;
     if (!user) return;
     kumaRequestInProgress = true;
@@ -771,13 +771,14 @@ async function loadKumaStatus() {
         renderKumaOverview(data.summary || {});
         put('kumaLastUpdated', 'API · ' + new Date(data.checked_at || Date.now()).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }));
         renderKumaTable();
+        if (document.getElementById('popTableBody')) renderPopTable(opsGroups(globalData || [], 'POP'));
     } catch (error) {
         console.error('Uptime Kuma status:', error);
         if (errorBox) {
             errorBox.textContent = 'Gagal memuat status Kuma: ' + error.message + '. Periksa environment variable Vercel dan koneksi API Bridge.';
             errorBox.hidden = false;
         }
-        body.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Status Uptime Kuma tidak tersedia.</td></tr>';
+        if (body) body.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Status Uptime Kuma tidak tersedia.</td></tr>';
     } finally {
         kumaRequestInProgress = false;
         if (refresh) refresh.disabled = false;
@@ -855,7 +856,11 @@ function renderInventoryPopOptions(groups){const el=document.getElementById('inv
 function renderPopTable(groups){
  const body=document.getElementById('popTableBody');if(!body)return;const names=Object.keys(groups).sort((a,b)=>a.localeCompare(b,'id'));const label=document.getElementById('popCountLabel');if(label)label.textContent=names.length+' lokasi';
  if(!names.length){body.innerHTML='<tr><td colspan="7" class="text-center text-muted">Belum ada data POP.</td></tr>';return;}
- body.innerHTML=names.map(n=>{const d=groups[n],up=d.filter(r=>opsStatus(r['Status NMS'])==='up').length,down=d.filter(r=>opsStatus(r['Status NMS'])==='down').length,ont=d.reduce((s,r)=>s+opsNumber(r['Jumlah ont regist']),0),isp=[...new Set(d.map(r=>r['Nama ISP']).filter(Boolean))].join(', ')||'-',ips=d.map(r=>r['IP']).filter(Boolean).join(', ')||'-';return '<tr><td class="fw-semibold">'+opsText(n)+'</td><td>'+opsText(isp)+'</td><td>'+d.length+'</td><td><span class="ops-status-up">'+up+'</span></td><td><span class="ops-status-down">'+down+'</span></td><td>'+ont.toLocaleString('id-ID')+'</td><td class="ops-ip-list">'+opsText(ips)+'</td></tr>';}).join('');
+ const hasKuma=Array.isArray(kumaMonitors)&&kumaMonitors.length>0;
+ body.innerHTML=names.map(n=>{const d=groups[n],matched=d.map(r=>{
+   const hostname=String(r['Hostname']||'').trim().toLowerCase(),ip=String(r['IP']||'').trim().toLowerCase();
+   return kumaMonitors.find(m=>(hostname&&String(m.name||'').trim().toLowerCase()===hostname)||(ip&&String(m.ip||'').trim().toLowerCase()===ip));
+  }).filter(Boolean),up=hasKuma?matched.filter(m=>m.status==='UP').length:0,down=hasKuma?matched.filter(m=>m.status==='DOWN').length:0,ont=d.reduce((s,r)=>s+opsNumber(r['Jumlah ont regist']),0),isp=[...new Set(d.map(r=>r['Nama ISP']).filter(Boolean))].join(', ')||'-',ips=d.map(r=>r['IP']).filter(Boolean).join(', ')||'-';return '<tr><td class="fw-semibold">'+opsText(n)+'</td><td>'+opsText(isp)+'</td><td>'+d.length+'</td><td><span class="ops-status-up">'+up+'</span></td><td><span class="ops-status-down">'+down+'</span></td><td>'+ont.toLocaleString('id-ID')+'</td><td class="ops-ip-list">'+opsText(ips)+'</td></tr>';}).join('');
 }
 function renderAnalyticsCharts(groups){
  if(typeof Chart==='undefined')return;
