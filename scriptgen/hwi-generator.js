@@ -10,25 +10,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const summaryBox = document.getElementById("summaryBox");
   const emptyState = document.getElementById("csvEmptyState");
   const setNotice = (message) => { if (notice) notice.textContent = message; };
+  const oltAsal = document.getElementById("oltAsal");
+  const slotWrap = document.getElementById("slotTujuanWrap");
+  const slotInput = document.getElementById("slotTujuan");
+  const syncSlotField = () => {
+    const isPizza = oltAsal.value === "pizza";
+    slotWrap.hidden = !isPizza;
+    slotInput.required = isPizza;
+    if (!isPizza) slotInput.value = "";
+  };
+  oltAsal.addEventListener("change", syncSlotField);
+  syncSlotField();
 
   if (previewBtn) previewBtn.addEventListener("click", () => {
     const hostname = document.getElementById("hostname").value.trim();
-    const slotTujuan = document.getElementById("slotTujuan").value.trim();
+    const oltType = oltAsal.value;
+    const slotTujuan = slotInput.value.trim();
     const vlanStasiun = document.getElementById("vlanStasiun").value.trim();
     const csvFile = csvFileInput.files[0];
     setNotice("");
-    if (!hostname || !slotTujuan || !vlanStasiun || !csvFile) {
-      setNotice("Lengkapi hostname, card tujuan/slot, VLAN stasiun, dan pilih file CSV.");
+    if (!hostname || (oltType === "pizza" && !slotTujuan) || !vlanStasiun || !csvFile) {
+      setNotice("Lengkapi hostname, VLAN Stasiun, file CSV" + (oltType === "pizza" ? ", dan Card Tujuan." : "."));
       return;
     }
-    if (!/^\d+$/.test(slotTujuan) || !/^\d+$/.test(vlanStasiun) || Number(vlanStasiun) < 1 || Number(vlanStasiun) > 4094) {
-      setNotice("Card tujuan harus berupa angka dan VLAN stasiun harus 1–4094.");
+    if ((oltType === "pizza" && !/^\\d+$/.test(slotTujuan)) || !/^\\d+$/.test(vlanStasiun) || Number(vlanStasiun) < 1 || Number(vlanStasiun) > 4094) {
+      setNotice("Card tujuan harus berupa angka dan VLAN Stasiun harus 1–4094.");
       return;
     }
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        processAndPreviewCSV(event.target.result, hostname, slotTujuan, vlanStasiun);
+        processAndPreviewCSV(event.target.result, hostname, slotTujuan, vlanStasiun, oltType);
         if (!parsedData.length) return;
         document.getElementById("csvFileName").textContent = csvFile.name;
         summaryBox.hidden = false;
@@ -62,9 +74,9 @@ function parseCsvRows(text) {
   return rows;
 }
 
-function processAndPreviewCSV(csvText, hostname, slotTujuan, vlanStasiun) {
+function processAndPreviewCSV(csvText, hostname, slotTujuan, vlanStasiun, oltType) {
   parsedData = [];
-  globalConfig = { hostname, slotTujuan, vlanStasiun };
+  globalConfig = { hostname, slotTujuan, vlanStasiun, oltType };
   const rows = parseCsvRows(String(csvText).replace(/^\uFEFF/, ""));
   const headerIdx = rows.findIndex(row => {
     const h = row.map(x => x.trim().toLowerCase());
@@ -76,7 +88,7 @@ function processAndPreviewCSV(csvText, hostname, slotTujuan, vlanStasiun) {
   }
   const headers = rows[headerIdx].map(x => x.trim().toLowerCase());
   const idx = key => headers.indexOf(key);
-  const required = ["pon","sn","vlan inet","vlan tr"];
+  const required = ["pon","sn","vlan inet","vlan tr", ...(oltType === "chassis" ? ["card"] : [])];
   const missing = required.filter(key => idx(key) < 0);
   if (missing.length) throw new Error("Kolom wajib tidak ditemukan: " + missing.join(", "));
 
@@ -89,6 +101,7 @@ function processAndPreviewCSV(csvText, hostname, slotTujuan, vlanStasiun) {
     const row = rows[i];
     if (!row || row.every(cell => !String(cell || "").trim())) continue;
     const ponRaw = String(row[idx("pon")] || "").trim();
+    const cardRaw = oltType === "chassis" ? String(row[idx("card")] || "").trim() : slotTujuan;
     const sn = String(row[idx("sn")] || "").trim().substring(0, 16);
     const vlanInet = String(row[idx("vlan inet")] || "").trim();
     const vlanTr = String(row[idx("vlan tr")] || "").trim();
@@ -99,13 +112,15 @@ function processAndPreviewCSV(csvText, hostname, slotTujuan, vlanStasiun) {
       invalid++;
       continue;
     }
+    const slot = Number(cardRaw);
     const port = Number(ponRaw) - 1;
     if (seenSn.has(sn.toUpperCase())) { duplicateSn++; continue; }
     seenSn.add(sn.toUpperCase());
-    const onuId = nextOnuByPort.get(port) || 0;
-    nextOnuByPort.set(port, onuId + 1);
+    const portKey = slot + ":" + port;
+    const onuId = nextOnuByPort.get(portKey) || 0;
+    nextOnuByPort.set(portKey, onuId + 1);
     const safeDescription = (description || sn).replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
-    parsedData.push({ port, onuId, sn, vlanInet, vlanTr, description: safeDescription, pppoeUsername, pppoePassword });
+    parsedData.push({ slot, port, onuId, sn, vlanInet, vlanTr, description: safeDescription, pppoeUsername, pppoePassword });
     ponCounts.set(port, (ponCounts.get(port) || 0) + 1);
     const status = String(row[idx("status")] || "").toLowerCase();
     if (status.includes("online")) online++;
@@ -135,87 +150,73 @@ function generateAndDownload() {
     document.getElementById("csvNotice").textContent = "Belum ada data ONU untuk dibuatkan script.";
     return;
   }
-
-  const byPort = new Map();
-  parsedData.forEach(item => {
-    if (!byPort.has(item.port)) byPort.set(item.port, []);
-    byPort.get(item.port).push(item);
-  });
-
-  const ordered = [...parsedData].sort((a, b) =>
-    a.port - b.port || a.onuId - b.onuId
-  );
-  const slot = globalConfig.slotTujuan;
+  const ordered = [...parsedData].sort((a,b) => a.slot-b.slot || a.port-b.port || a.onuId-b.onuId);
+  const slots = [...new Set(ordered.map(d => d.slot))].sort((a,b) => a-b);
   const pppoeVlan = globalConfig.vlanStasiun;
-  const quote = value => String(value || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const translateEnabled = document.getElementById("enableVlanTranslation")?.checked === true;
+  const quote = value => String(value || "").replace(/\\\\/g, "\\\\\\\\").replace(/"/g, '\\\\"');
+  let script = "";
 
-  let script = "interface gpon 0/" + slot + "\n\n";
-
-  // BLOK 1: seluruh perintah ont add.
-  for (const d of ordered) {
-    script +=
-      "ont add " + d.port + " " + d.onuId + " sn-auth " + d.sn +
-      " omci ont-lineprofile-name SURGE_LP_ALLVLAN ont-srvprofile-name SURGE_SP_ALLVLAN desc \"" + quote(d.description) + "\"\n";
+  // BLOK 1: ONT ADD, dikelompokkan per card.
+  for (const slot of slots) {
+    script += "interface gpon 0/" + slot + "\n";
+    for (const d of ordered.filter(x => x.slot === slot)) {
+      script += "ont add " + d.port + " " + d.onuId + " sn-auth " + d.sn +
+        " omci ont-lineprofile-name SURGE_LP_ALLVLAN ont-srvprofile-name SURGE_SP_ALLVLAN desc \"" + quote(d.description) + "\"\n";
+    }
+    script += "\n";
   }
 
-  script += "\n";
-
-  // BLOK 2: seluruh konfigurasi layanan DHCP dan TR-069.
-  for (const d of ordered) {
-    script +=
-      "ont ipconfig " + d.port + " " + d.onuId + " ip-index 1 dhcp vlan " + d.vlanTr + " priority 0\n" +
-      "ont tr069-server-config " + d.port + " " + d.onuId + " profile-name YINET_ACS\n";
+  // BLOK 2: DHCP dan TR-069.
+  for (const slot of slots) {
+    script += "interface gpon 0/" + slot + "\n";
+    for (const d of ordered.filter(x => x.slot === slot)) {
+      script += "ont ipconfig " + d.port + " " + d.onuId + " ip-index 1 dhcp vlan " + d.vlanTr + " priority 0\n" +
+        "ont tr069-server-config " + d.port + " " + d.onuId + " profile-name YINET_ACS\n";
+    }
+    script += "\n";
   }
 
-  script += "\n";
-
-  // BLOK 3: seluruh konfigurasi WAN PPPoE.
-  for (const d of ordered) {
-    script +=
-      "ont ipconfig " + d.port + " " + d.onuId + " pppoe vlan " + pppoeVlan +
-      " priority 0 user-account username " + d.pppoeUsername +
-      " password " + d.pppoePassword + "\n" +
-      "ont internet-config " + d.port + " " + d.onuId + " ip-index 0\n" +
-      "ont wan-config " + d.port + " " + d.onuId + " ip-index 0 profile-name pppoe_wan\n" +
-      "ont policy-route-config " + d.port + " " + d.onuId + " profile-name pppoe_policy\n" +
-      "ont port route " + d.port + " " + d.onuId + " eth 1-4 enable\n\n";
+  // BLOK 3: WAN PPPoE.
+  for (const slot of slots) {
+    script += "interface gpon 0/" + slot + "\n";
+    for (const d of ordered.filter(x => x.slot === slot)) {
+      script += "ont ipconfig " + d.port + " " + d.onuId + " pppoe vlan " + pppoeVlan +
+        " priority 0 user-account username " + d.pppoeUsername + " password " + d.pppoePassword + "\n" +
+        "ont internet-config " + d.port + " " + d.onuId + " ip-index 0\n" +
+        "ont wan-config " + d.port + " " + d.onuId + " ip-index 0 profile-name pppoe_wan\n" +
+        "ont policy-route-config " + d.port + " " + d.onuId + " profile-name pppoe_policy\n" +
+        "ont port route " + d.port + " " + d.onuId + " eth 1-4 enable\n\n";
+    }
   }
 
-  // Satu kali quit sebagai pembatas sebelum blok service-port.
+  // Satu kali quit sebelum service-port.
   script += "quit\n\n";
 
-  // BLOK 4: translasi VLAN INET yang berbeda dari VLAN Stasiun (opsional).
-  const translateEnabled = document.getElementById("enableVlanTranslation")?.checked === true;
+  // BLOK 4: VLAN ONT (CSV VLAN INET) ke VLAN Stasiun.
   if (translateEnabled) {
     const translations = new Map();
     for (const d of ordered) {
       const currentVlan = String(d.vlanInet);
       if (currentVlan === String(pppoeVlan)) continue;
-      const key = d.port + ":" + currentVlan;
-      if (!translations.has(key)) translations.set(key, { port: d.port, currentVlan });
+      const key = d.slot + ":" + d.port + ":" + currentVlan;
+      if (!translations.has(key)) translations.set(key, {slot:d.slot, port:d.port, currentVlan});
     }
-
-    for (const item of [...translations.values()].sort((a, b) =>
-      a.port - b.port || Number(a.currentVlan) - Number(b.currentVlan)
-    )) {
-      script +=
-        "service-port modify-vlan port 0/" + slot + "/" + item.port +
-        " current-vlan " + item.currentVlan + " to-vlan " + pppoeVlan + "\\n" +
-        "y\\n";
+    for (const item of translations.values()) {
+      script += "service-port modify-vlan port 0/" + item.slot + "/" + item.port +
+        " current-vlan " + item.currentVlan + " to-vlan " + pppoeVlan + "\n" + "y\n";
     }
-    if (translations.size) script += "\\n";
+    if (translations.size) script += "\n";
   }
 
-  // BLOK 5: seluruh service-port diletakkan setelah translasi VLAN.
+  // BLOK 5: SERVICE-PORT.
   for (const d of ordered) {
-    const gponPath = "gpon 0/" + slot + "/" + d.port;
-    script +=
-      "service-port vlan " + d.vlanTr + " " + gponPath + " ont " + d.onuId +
+    const path = "gpon 0/" + d.slot + "/" + d.port;
+    script += "service-port vlan " + d.vlanTr + " " + path + " ont " + d.onuId +
       " gemport 1 multi-service user-vlan " + d.vlanTr + " tag-transform translate\n" +
-      "service-port vlan " + (translateEnabled ? pppoeVlan : d.vlanInet) + " " + gponPath + " ont " + d.onuId +
+      "service-port vlan " + (translateEnabled ? pppoeVlan : d.vlanInet) + " " + path + " ont " + d.onuId +
       " gemport 1 multi-service user-vlan " + d.vlanInet + " tag-transform translate\n";
   }
-
   downloadTextFile(script, globalConfig.hostname + ".txt");
 }
 
