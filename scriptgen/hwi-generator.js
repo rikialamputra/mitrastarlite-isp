@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setNotice("Lengkapi hostname, VLAN Stasiun, file CSV" + (oltType === "pizza" ? ", dan Card Tujuan." : "."));
       return;
     }
-    if ((oltType === "pizza" && !/^\\d+$/.test(slotTujuan)) || !/^\\d+$/.test(vlanStasiun) || Number(vlanStasiun) < 1 || Number(vlanStasiun) > 4094) {
+    if ((oltType === "pizza" && !/^\d+$/.test(slotTujuan)) || !/^\d+$/.test(vlanStasiun) || Number(vlanStasiun) < 1 || Number(vlanStasiun) > 4094) {
       setNotice("Card tujuan harus berupa angka dan VLAN Stasiun harus 1–4094.");
       return;
     }
@@ -154,7 +154,7 @@ function generateAndDownload() {
   const slots = [...new Set(ordered.map(d => d.slot))].sort((a,b) => a-b);
   const pppoeVlan = globalConfig.vlanStasiun;
   const translateEnabled = document.getElementById("enableVlanTranslation")?.checked === true;
-  const quote = value => String(value || "").replace(/\\\\/g, "\\\\\\\\").replace(/"/g, '\\\\"');
+  const quote = value => String(value || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   let script = "";
 
   // BLOK 1: ONT ADD, dikelompokkan per card.
