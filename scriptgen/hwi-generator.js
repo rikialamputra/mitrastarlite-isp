@@ -149,49 +149,49 @@ function generateAndDownload() {
   const pppoeVlan = globalConfig.vlanStasiun;
   const quote = value => String(value || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
-  let script = "interface gpon 0/" + slot + "\\n\\n";
+  let script = "interface gpon 0/" + slot + "\n\n";
 
   // BLOK 1: seluruh perintah ont add.
   for (const d of ordered) {
     script +=
       "ont add " + d.port + " " + d.onuId + " sn-auth " + d.sn +
-      " omci ont-lineprofile-name SURGE_LP_ALLVLAN ont-srvprofile-name SURGE_SP_ALLVLAN desc \"" + quote(d.description) + "\"\\n";
+      " omci ont-lineprofile-name SURGE_LP_ALLVLAN ont-srvprofile-name SURGE_SP_ALLVLAN desc \"" + quote(d.description) + "\"\n";
   }
 
-  script += "\\n";
+  script += "\n";
 
   // BLOK 2: seluruh konfigurasi layanan DHCP dan TR-069.
   for (const d of ordered) {
     script +=
-      "ont ipconfig " + d.port + " " + d.onuId + " ip-index 1 dhcp vlan " + d.vlanTr + " priority 0\\n" +
-      "ont tr069-server-config " + d.port + " " + d.onuId + " profile-name YINET_ACS\\n";
+      "ont ipconfig " + d.port + " " + d.onuId + " ip-index 1 dhcp vlan " + d.vlanTr + " priority 0\n" +
+      "ont tr069-server-config " + d.port + " " + d.onuId + " profile-name YINET_ACS\n";
   }
 
-  script += "\\n";
+  script += "\n";
 
   // BLOK 3: seluruh konfigurasi WAN PPPoE.
   for (const d of ordered) {
     script +=
       "ont ipconfig " + d.port + " " + d.onuId + " pppoe vlan " + pppoeVlan +
       " priority 0 user-account username " + d.pppoeUsername +
-      " password " + d.pppoePassword + "\\n" +
-      "ont internet-config " + d.port + " " + d.onuId + " ip-index 0\\n" +
-      "ont wan-config " + d.port + " " + d.onuId + " ip-index 0 profile-name pppoe_wan\\n" +
-      "ont policy-route-config " + d.port + " " + d.onuId + " profile-name pppoe_policy\\n" +
-      "ont port route " + d.port + " " + d.onuId + " eth 1-4 enable\\n\\n";
+      " password " + d.pppoePassword + "\n" +
+      "ont internet-config " + d.port + " " + d.onuId + " ip-index 0\n" +
+      "ont wan-config " + d.port + " " + d.onuId + " ip-index 0 profile-name pppoe_wan\n" +
+      "ont policy-route-config " + d.port + " " + d.onuId + " profile-name pppoe_policy\n" +
+      "ont port route " + d.port + " " + d.onuId + " eth 1-4 enable\n\n";
   }
 
   // Satu kali quit sebagai pembatas sebelum blok service-port.
-  script += "quit\\n\\n";
+  script += "quit\n\n";
 
   // BLOK 4: seluruh service-port diletakkan setelah quit.
   for (const d of ordered) {
     const gponPath = "gpon 0/" + slot + "/" + d.port;
     script +=
       "service-port vlan " + d.vlanTr + " " + gponPath + " ont " + d.onuId +
-      " gemport 1 multi-service user-vlan " + d.vlanTr + " tag-transform translate\\n" +
+      " gemport 1 multi-service user-vlan " + d.vlanTr + " tag-transform translate\n" +
       "service-port vlan " + d.vlanInet + " " + gponPath + " ont " + d.onuId +
-      " gemport 1 multi-service user-vlan " + d.vlanInet + " tag-transform translate\\n";
+      " gemport 1 multi-service user-vlan " + d.vlanInet + " tag-transform translate\n";
   }
 
   downloadTextFile(script, globalConfig.hostname + ".txt");
