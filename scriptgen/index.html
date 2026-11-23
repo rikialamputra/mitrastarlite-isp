@@ -136,17 +136,17 @@
               <div><span class="step-label">HUAWEI / CSV IMPORT</span><h2>ONU Configuration Builder</h2></div>
               <span class="heading-icon">⇧</span>
             </div>
-            <p class="csv-description">Upload file export Huawei OLT untuk membaca data ONU, memeriksa ringkasan, lalu membangun script konfigurasi secara otomatis.</p>
+            <p class="csv-description">Upload CSV migrasi pelanggan untuk membaca data ONU dan membangun script konfigurasi per blok: ONT ADD, SERVICE, WAN, lalu SERVICE-PORT.</p>
             <form id="generatorForm" class="csv-form">
               <label class="field-label" for="hostname">Hostname / Nama File</label>
               <input type="text" id="hostname" required placeholder="Contoh: OLT-KOTA-A">
               <label class="field-label" for="slotTujuan">Card Tujuan (Slot)</label>
               <input type="text" id="slotTujuan" required placeholder="Contoh: 1" inputmode="numeric">
-              <label class="field-label" for="vlanStasiun">VLAN Stasiun</label>
-              <input type="text" id="vlanStasiun" required placeholder="Contoh: 100" inputmode="numeric">
-              <label class="field-label" for="csvFile">File CSV Export Huawei</label>
+              <label class="field-label" for="vlanStasiun">VLAN PPPoE / VLAN Stasiun</label>
+              <input type="text" id="vlanStasiun" required placeholder="Contoh: 1360" inputmode="numeric">
+              <label class="field-label" for="csvFile">File CSV Migrasi Pelanggan</label>
               <input type="file" id="csvFile" accept=".csv,text/csv" required>
-              <small class="csv-hint">Format migrasi: User PPOE, Password PPOE, Card, PON, SN, VLAN INET, VLAN TR, dan ONT Description. Card tujuan diisi manual; PON dikonversi menjadi port (PON 1 → port 0), ONU ID dibuat otomatis mulai 0 pada setiap PON.</small>
+              <small class="csv-hint">Format CSV: User PPOE, Password PPOE, Card, PON, SN, VLAN INET, VLAN TR, dan ONT Description. VLAN PPPoE diisi pada parameter VLAN Stasiun. Card tujuan diisi manual; PON dikonversi menjadi port (PON 1 → port 0), ONU ID dibuat otomatis mulai 0 pada setiap PON.</small>
               <button type="button" id="previewBtn" class="primary-button"><span>Analisis File & Preview</span><span>→</span></button>
             </form>
             <div id="csvNotice" class="notice" role="alert"></div>
