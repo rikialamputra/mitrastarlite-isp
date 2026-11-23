@@ -146,7 +146,7 @@
               <input type="text" id="vlanStasiun" required placeholder="Contoh: 100" inputmode="numeric">
               <label class="field-label" for="csvFile">File CSV Export Huawei</label>
               <input type="file" id="csvFile" accept=".csv,text/csv" required>
-              <small class="csv-hint">Kolom wajib: Port, ONU ID, dan SN. Kolom Alias/Name serta Status akan dibaca jika tersedia.</small>
+              <small class="csv-hint">Format migrasi: User PPOE, Password PPOE, Card, PON, SN, VLAN INET, VLAN TR, dan ONT Description. Card tujuan diisi manual; PON dikonversi menjadi port (PON 1 → port 0), ONU ID dibuat otomatis mulai 0 pada setiap PON.</small>
               <button type="button" id="previewBtn" class="primary-button"><span>Analisis File & Preview</span><span>→</span></button>
             </form>
             <div id="csvNotice" class="notice" role="alert"></div>
