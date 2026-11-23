@@ -1,4 +1,4 @@
-// Huawei OLT CSV generator — standalone module for ScriptGen
+// Huawei OLT CSV migration generator — parses customer migration CSV.
 let parsedData = [];
 let globalConfig = {};
 
@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const notice = document.getElementById("csvNotice");
   const summaryBox = document.getElementById("summaryBox");
   const emptyState = document.getElementById("csvEmptyState");
-
   const setNotice = (message) => { if (notice) notice.textContent = message; };
+
   if (previewBtn) previewBtn.addEventListener("click", () => {
     const hostname = document.getElementById("hostname").value.trim();
     const slotTujuan = document.getElementById("slotTujuan").value.trim();
@@ -18,11 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const csvFile = csvFileInput.files[0];
     setNotice("");
     if (!hostname || !slotTujuan || !vlanStasiun || !csvFile) {
-      setNotice("Lengkapi hostname, slot tujuan, VLAN stasiun, dan pilih file CSV.");
+      setNotice("Lengkapi hostname, card tujuan/slot, VLAN stasiun, dan pilih file CSV.");
       return;
     }
-    if (!/^\d+$/.test(slotTujuan) || !/^\d+$/.test(vlanStasiun) || Number(vlanStasiun)<1 || Number(vlanStasiun)>4094) {
-      setNotice("Slot harus berupa angka dan VLAN harus berada pada rentang 1–4094.");
+    if (!/^\d+$/.test(slotTujuan) || !/^\d+$/.test(vlanStasiun) || Number(vlanStasiun) < 1 || Number(vlanStasiun) > 4094) {
+      setNotice("Card tujuan harus berupa angka dan VLAN stasiun harus 1–4094.");
       return;
     }
     const reader = new FileReader();
@@ -38,75 +38,135 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
     reader.onerror = () => setNotice("File CSV tidak dapat dibaca. Coba pilih file lain.");
-    reader.readAsText(csvFile);
+    reader.readAsText(csvFile, "UTF-8");
   });
   if (generateBtn) generateBtn.addEventListener("click", generateAndDownload);
 });
 
+// CSV reader that respects quoted fields containing commas, quotes, and line breaks.
+function parseCsvRows(text) {
+  const rows = [];
+  let row = [], field = "", quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (ch === '"') quoted = false;
+      else field += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ",") { row.push(field.trim()); field = ""; }
+    else if (ch === "\n") { row.push(field.trim()); rows.push(row); row = []; field = ""; }
+    else if (ch !== "\r" && ch !== "\u0000") field += ch;
+  }
+  if (field.length || row.length) { row.push(field.trim()); rows.push(row); }
+  return rows;
+}
+
 function processAndPreviewCSV(csvText, hostname, slotTujuan, vlanStasiun) {
   parsedData = [];
   globalConfig = { hostname, slotTujuan, vlanStasiun };
-  const lines = csvText.replace(/\x00/g, "").replace(/\r/g, "").split("\n");
-  let headerLineIdx = -1;
-  let headers = [];
-  for (let i=0;i<lines.length;i++) {
-    if (!lines[i].trim()) continue;
-    const cols = lines[i].replace(/"/g,"").split(",").map(c=>c.trim().toLowerCase());
-    if (cols.includes("port") && (cols.includes("onu id") || cols.includes("onuid")) && cols.includes("sn")) {
-      headerLineIdx=i; headers=cols; break;
+  const rows = parseCsvRows(String(csvText).replace(/^\uFEFF/, ""));
+  const headerIdx = rows.findIndex(row => {
+    const h = row.map(x => x.trim().toLowerCase());
+    return ["pon","sn","vlan inet","vlan tr","ont description"].every(key => h.includes(key));
+  });
+  if (headerIdx < 0) {
+    document.getElementById("csvNotice").textContent = "Format CSV tidak dikenali. Wajib ada kolom PON, SN, VLAN INET, VLAN TR, dan ONT Description.";
+    return;
+  }
+  const headers = rows[headerIdx].map(x => x.trim().toLowerCase());
+  const idx = key => headers.indexOf(key);
+  const required = ["pon","sn","vlan inet","vlan tr"];
+  const missing = required.filter(key => idx(key) < 0);
+  if (missing.length) throw new Error("Kolom wajib tidak ditemukan: " + missing.join(", "));
+
+  const nextOnuByPort = new Map();
+  const seenSn = new Set();
+  let duplicateSn = 0, invalid = 0, online = 0;
+  const ponCounts = new Map();
+
+  for (let i = headerIdx + 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || row.every(cell => !String(cell || "").trim())) continue;
+    const ponRaw = String(row[idx("pon")] || "").trim();
+    const sn = String(row[idx("sn")] || "").trim().substring(0, 16);
+    const vlanInet = String(row[idx("vlan inet")] || "").trim();
+    const vlanTr = String(row[idx("vlan tr")] || "").trim();
+    const description = String(row[idx("ont description")] || row[idx("nama")] || "").trim();
+    if (!/^\d+$/.test(ponRaw) || Number(ponRaw) < 1 || !sn || !/^\d+$/.test(vlanInet) || Number(vlanInet) < 1 || Number(vlanInet) > 4094 || !/^\d+$/.test(vlanTr) || Number(vlanTr) < 1 || Number(vlanTr) > 4094) {
+      invalid++;
+      continue;
     }
+    const port = Number(ponRaw) - 1;
+    if (seenSn.has(sn.toUpperCase())) { duplicateSn++; continue; }
+    seenSn.add(sn.toUpperCase());
+    const onuId = nextOnuByPort.get(port) || 0;
+    nextOnuByPort.set(port, onuId + 1);
+    const safeDescription = (description || sn).replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+    parsedData.push({ port, onuId, sn, vlanInet, vlanTr, description: safeDescription });
+    ponCounts.set(port, (ponCounts.get(port) || 0) + 1);
+    const status = String(row[idx("status")] || "").toLowerCase();
+    if (status.includes("online")) online++;
   }
-  if(headerLineIdx===-1) { document.getElementById("csvNotice").textContent="Format CSV tidak dikenali. Pastikan tersedia kolom Port, ONU ID, dan SN."; return; }
-  const portIdx=headers.indexOf("port");
-  const onuIdIdx=headers.indexOf("onu id")!==-1?headers.indexOf("onu id"):headers.indexOf("onuid");
-  const snIdx=headers.indexOf("sn");
-  let aliasIdx=headers.indexOf("alias"); if(aliasIdx===-1) aliasIdx=headers.indexOf("name");
-  let statusIdx=headers.indexOf("status"); if(statusIdx===-1) statusIdx=headers.indexOf("operation status");
-  let online=0,offline=0;
-  for(let i=headerLineIdx+1;i<lines.length;i++){
-    if(!lines[i].trim()) continue;
-    const row=lines[i].replace(/"/g,"").split(",").map(c=>c.trim());
-    const port=row[portIdx]||"",onuId=row[onuIdIdx]||"",snFull=row[snIdx]||"";
-    let alias=aliasIdx!==-1&&row[aliasIdx]?row[aliasIdx]:"";
-    const status=statusIdx!==-1&&row[statusIdx]?row[statusIdx]:"";
-    if(!snFull||!port||!onuId) continue;
-    const sn=snFull.substring(0,16);
-    if(!alias||alias.includes("--")) alias=sn;
-    if(status.toLowerCase().includes("online")) online++; else offline++;
-    parsedData.push({port,onuId,sn,alias});
+
+  if (!parsedData.length) {
+    document.getElementById("csvNotice").textContent = "Tidak ada baris ONU valid. Periksa PON, SN, VLAN INET, dan VLAN TR.";
+    return;
   }
-  if(!parsedData.length) { document.getElementById("csvNotice").textContent="Tidak ada baris ONU valid yang ditemukan pada CSV."; return; }
+  const ponSummary = [...ponCounts.entries()].sort((a,b)=>a[0]-b[0]).map(([port,count]) => "PON " + (port+1) + ": " + count).join(" · ");
   document.getElementById("summaryText").innerHTML =
-    '<div class="metric-card"><span>ONU Terdeteksi</span><strong>'+parsedData.length+'</strong></div>'+
-    '<div class="metric-card online"><span>Online</span><strong>'+online+'</strong></div>'+
-    '<div class="metric-card offline"><span>Offline / Lainnya</span><strong>'+offline+'</strong></div>'+
-    '<div class="metric-card"><span>Header CSV di baris</span><strong>'+ (headerLineIdx+1) +'</strong></div>';
-  document.getElementById("summaryBox").hidden=false;
+    '<div class="metric-card"><span>ONU Valid</span><strong>'+parsedData.length.toLocaleString("id-ID")+'</strong></div>'+
+    '<div class="metric-card"><span>PON Terpakai</span><strong>'+ponCounts.size+'</strong></div>'+
+    '<div class="metric-card offline"><span>SN Duplikat Dilewati</span><strong>'+duplicateSn+'</strong></div>'+
+    '<div class="metric-card"><span>Baris Tidak Valid</span><strong>'+invalid+'</strong></div>'+
+    '<div class="metric-card"><span>Header CSV di Baris</span><strong>'+(headerIdx+1)+'</strong></div>'+
+    '<div class="metric-card"><span>ONU per PON</span><strong style="font-size:12px;line-height:1.5">'+ponSummary+'</strong></div>';
+  document.getElementById("summaryBox").hidden = false;
+  const notice = document.getElementById("csvNotice");
+  notice.textContent = duplicateSn || invalid
+    ? "Perhatian: " + duplicateSn + " SN duplikat dilewati dan " + invalid + " baris tidak valid dilewati. Periksa ringkasan sebelum generate."
+    : "CSV berhasil dibaca. ONU ID dibuat mulai 0 pada setiap PON.";
 }
 
 function generateAndDownload() {
-  if(!parsedData.length) { document.getElementById("csvNotice").textContent="Belum ada data ONU untuk dibuatkan script."; return; }
-  let finalScript="";
-  parsedData.forEach(data=>{
-    finalScript += `interface gpon 0/${globalConfig.slotTujuan}
-ont add ${data.port} ${data.onuId} sn-auth ${data.sn} omci ont-lineprofile-name SURGE_LP_ALLVLAN ont-srvprofile-name SURGE_SP_ALLVLAN desc ${data.alias}
-ont ipconfig ${data.port} ${data.onuId} ip-index 1 dhcp vlan 81 priority 0
-ont tr069-server-config ${data.port} ${data.onuId} profile-name YINET_ACS
-ont internet-config ${data.port} ${data.onuId} ip-index 0
-ont wan-config ${data.port} ${data.onuId} ip-index 0 profile-name pppoe_wan
-ont policy-route-config ${data.port} ${data.onuId} profile-name pppoe_policy
-ont port route ${data.port} ${data.onuId} eth 1-4 enable
-quit
-service-port vlan 81 gpon 0/${globalConfig.slotTujuan}/${data.port} ont ${data.onuId} gemport 1 multi-service user-vlan 81 tag-transform translate
-service-port vlan ${globalConfig.vlanStasiun} gpon 0/${globalConfig.slotTujuan}/${data.port} ont ${data.onuId} gemport 1 multi-service user-vlan ${globalConfig.vlanStasiun} tag-transform translate
-\n`;
+  if (!parsedData.length) {
+    document.getElementById("csvNotice").textContent = "Belum ada data ONU untuk dibuatkan script.";
+    return;
+  }
+  const byPort = new Map();
+  parsedData.forEach(item => {
+    if (!byPort.has(item.port)) byPort.set(item.port, []);
+    byPort.get(item.port).push(item);
   });
-  downloadTextFile(finalScript, globalConfig.hostname+".txt");
+  let script = "";
+  for (const [port, items] of [...byPort.entries()].sort((a,b)=>a[0]-b[0])) {
+    script += "interface gpon 0/" + globalConfig.slotTujuan + "\n";
+    for (const d of items) {
+      script +=
+        "ont add " + port + " " + d.onuId + " sn-auth " + d.sn +
+        " omci ont-lineprofile-name SURGE_LP_ALLVLAN ont-srvprofile-name SURGE_SP_ALLVLAN desc " + d.description + "\n" +
+        "ont ipconfig " + port + " " + d.onuId + " ip-index 1 dhcp vlan " + d.vlanTr + " priority 0\n" +
+        "ont tr069-server-config " + port + " " + d.onuId + " profile-name YINET_ACS\n" +
+        "ont internet-config " + port + " " + d.onuId + " ip-index 0\n" +
+        "ont wan-config " + port + " " + d.onuId + " ip-index 0 profile-name pppoe_wan\n" +
+        "ont policy-route-config " + port + " " + d.onuId + " profile-name pppoe_policy\n" +
+        "ont port route " + port + " " + d.onuId + " eth 1-4 enable\n" +
+        "quit\n" +
+        "service-port vlan " + d.vlanTr + " gpon 0/" + globalConfig.slotTujuan + "/" + port + " ont " + d.onuId + " gemport 1 multi-service user-vlan " + d.vlanTr + " tag-transform translate\n" +
+        "service-port vlan " + d.vlanInet + " gpon 0/" + globalConfig.slotTujuan + "/" + port + " ont " + d.onuId + " gemport 1 multi-service user-vlan " + d.vlanInet + " tag-transform translate\n\n";
+    }
+  }
+  downloadTextFile(script, globalConfig.hostname + ".txt");
 }
-function downloadTextFile(content,filename) {
-  const blob=new Blob([content],{type:"text/plain;charset=utf-8"});
-  const url=URL.createObjectURL(blob);
-  const link=document.createElement("a");
-  link.href=url; link.download=filename; document.body.appendChild(link); link.click(); link.remove();
+
+function downloadTextFile(content, filename) {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
   URL.revokeObjectURL(url);
 }
