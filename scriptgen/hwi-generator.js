@@ -212,7 +212,7 @@ function generateAndDownload() {
     script +=
       "service-port vlan " + d.vlanTr + " " + gponPath + " ont " + d.onuId +
       " gemport 1 multi-service user-vlan " + d.vlanTr + " tag-transform translate\n" +
-      "service-port vlan " + d.vlanInet + " " + gponPath + " ont " + d.onuId +
+      "service-port vlan " + (translateEnabled ? pppoeVlan : d.vlanInet) + " " + gponPath + " ont " + d.onuId +
       " gemport 1 multi-service user-vlan " + d.vlanInet + " tag-transform translate\n";
   }
 
