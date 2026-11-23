@@ -202,21 +202,7 @@ function generateAndDownload() {
       " gemport 1 multi-service user-vlan " + d.vlanInet + " tag-transform translate\n";
   }
 
-  // BLOK 5: VLAN TRANSLATION diletakkan paling bawah, setelah seluruh service-port.
-  if (translateEnabled) {
-    const translations = new Map();
-    for (const d of ordered) {
-      const currentVlan = String(d.vlanInet);
-      if (currentVlan === String(pppoeVlan)) continue;
-      const key = d.slot + ":" + d.port + ":" + currentVlan;
-      if (!translations.has(key)) translations.set(key, {slot:d.slot, port:d.port, currentVlan});
-    }
-    if (translations.size) script += "\\n";
-    for (const item of translations.values()) {
-      script += "service-port modify-vlan port 0/" + item.slot + "/" + item.port +
-        " current-vlan " + item.currentVlan + " to-vlan " + pppoeVlan + "\\n" + "y\\n";
-    }
-  }
+
   downloadTextFile(script, globalConfig.hostname + ".txt");
 }
 
