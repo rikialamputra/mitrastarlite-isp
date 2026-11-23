@@ -193,7 +193,16 @@ function generateAndDownload() {
   // Satu kali quit sebelum service-port.
   script += "quit\n\n";
 
-  // BLOK 4: VLAN ONT (CSV VLAN INET) ke VLAN Stasiun.
+  // BLOK 4: SERVICE-PORT.
+  for (const d of ordered) {
+    const path = "gpon 0/" + d.slot + "/" + d.port;
+    script += "service-port vlan " + d.vlanTr + " " + path + " ont " + d.onuId +
+      " gemport 1 multi-service user-vlan " + d.vlanTr + " tag-transform translate\n" +
+      "service-port vlan " + (translateEnabled ? pppoeVlan : d.vlanInet) + " " + path + " ont " + d.onuId +
+      " gemport 1 multi-service user-vlan " + d.vlanInet + " tag-transform translate\n";
+  }
+
+  // BLOK 5: VLAN TRANSLATION diletakkan paling bawah, setelah seluruh service-port.
   if (translateEnabled) {
     const translations = new Map();
     for (const d of ordered) {
@@ -202,20 +211,11 @@ function generateAndDownload() {
       const key = d.slot + ":" + d.port + ":" + currentVlan;
       if (!translations.has(key)) translations.set(key, {slot:d.slot, port:d.port, currentVlan});
     }
+    if (translations.size) script += "\\n";
     for (const item of translations.values()) {
       script += "service-port modify-vlan port 0/" + item.slot + "/" + item.port +
-        " current-vlan " + item.currentVlan + " to-vlan " + pppoeVlan + "\n" + "y\n";
+        " current-vlan " + item.currentVlan + " to-vlan " + pppoeVlan + "\\n" + "y\\n";
     }
-    if (translations.size) script += "\n";
-  }
-
-  // BLOK 5: SERVICE-PORT.
-  for (const d of ordered) {
-    const path = "gpon 0/" + d.slot + "/" + d.port;
-    script += "service-port vlan " + d.vlanTr + " " + path + " ont " + d.onuId +
-      " gemport 1 multi-service user-vlan " + d.vlanTr + " tag-transform translate\n" +
-      "service-port vlan " + (translateEnabled ? pppoeVlan : d.vlanInet) + " " + path + " ont " + d.onuId +
-      " gemport 1 multi-service user-vlan " + d.vlanInet + " tag-transform translate\n";
   }
   downloadTextFile(script, globalConfig.hostname + ".txt");
 }
