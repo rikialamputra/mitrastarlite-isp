@@ -184,7 +184,29 @@ function generateAndDownload() {
   // Satu kali quit sebagai pembatas sebelum blok service-port.
   script += "quit\n\n";
 
-  // BLOK 4: seluruh service-port diletakkan setelah quit.
+  // BLOK 4: translasi VLAN INET yang berbeda dari VLAN Stasiun (opsional).
+  const translateEnabled = document.getElementById("enableVlanTranslation")?.checked === true;
+  if (translateEnabled) {
+    const translations = new Map();
+    for (const d of ordered) {
+      const currentVlan = String(d.vlanInet);
+      if (currentVlan === String(pppoeVlan)) continue;
+      const key = d.port + ":" + currentVlan;
+      if (!translations.has(key)) translations.set(key, { port: d.port, currentVlan });
+    }
+
+    for (const item of [...translations.values()].sort((a, b) =>
+      a.port - b.port || Number(a.currentVlan) - Number(b.currentVlan)
+    )) {
+      script +=
+        "service-port modify-vlan port 0/" + slot + "/" + item.port +
+        " current-vlan " + item.currentVlan + " to-vlan " + pppoeVlan + "\\n" +
+        "y\\n";
+    }
+    if (translations.size) script += "\\n";
+  }
+
+  // BLOK 5: seluruh service-port diletakkan setelah translasi VLAN.
   for (const d of ordered) {
     const gponPath = "gpon 0/" + slot + "/" + d.port;
     script +=
