@@ -144,7 +144,7 @@ function generateAndDownload() {
     for (const d of items) {
       script +=
         "ont add " + port + " " + d.onuId + " sn-auth " + d.sn +
-        " omci ont-lineprofile-name SURGE_LP_ALLVLAN ont-srvprofile-name SURGE_SP_ALLVLAN desc " + d.description + "\n" +
+        " omci ont-lineprofile-name SURGE_LP_ALLVLAN ont-srvprofile-name SURGE_SP_ALLVLAN desc \"" + d.description.replace(/"/g, '\"') + "\"\n" +
         "ont ipconfig " + port + " " + d.onuId + " ip-index 1 dhcp vlan " + d.vlanTr + " priority 0\n" +
         "ont tr069-server-config " + port + " " + d.onuId + " profile-name YINET_ACS\n" +
         "ont internet-config " + port + " " + d.onuId + " ip-index 0\n" +
