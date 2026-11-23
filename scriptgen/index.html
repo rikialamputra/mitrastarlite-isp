@@ -144,6 +144,12 @@
               <input type="text" id="slotTujuan" required placeholder="Contoh: 1" inputmode="numeric">
               <label class="field-label" for="vlanStasiun">VLAN PPPoE / VLAN Stasiun</label>
               <input type="text" id="vlanStasiun" required placeholder="Contoh: 1360" inputmode="numeric">
+              <label class="field-label" for="enableVlanTranslation">VLAN Translation</label>
+              <label class="csv-toggle" for="enableVlanTranslation">
+                <input type="checkbox" id="enableVlanTranslation">
+                <span>Aktifkan translasi VLAN INET ke VLAN Stasiun</span>
+              </label>
+              <small class="csv-hint">Jika aktif, generator otomatis mendeteksi VLAN INET dan PON dari CSV. Hanya port dengan VLAN INET berbeda dari VLAN Stasiun yang dibuatkan perintah service-port modify-vlan.</small>
               <label class="field-label" for="csvFile">File CSV Migrasi Pelanggan</label>
               <input type="file" id="csvFile" accept=".csv,text/csv" required>
               <small class="csv-hint">Format CSV: User PPOE, Password PPOE, Card, PON, SN, VLAN INET, VLAN TR, dan ONT Description. VLAN PPPoE diisi pada parameter VLAN Stasiun. Card tujuan diisi manual; PON dikonversi menjadi port (PON 1 → port 0), ONU ID dibuat otomatis mulai 0 pada setiap PON.</small>
